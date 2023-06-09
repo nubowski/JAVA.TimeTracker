@@ -24,6 +24,22 @@ public class UserTest {
     }
 
     @Test
+    public void testID() {
+        User user = new User();
+        Long idValue = 999L;
+        user.setId(idValue);
+        assertEquals(idValue, user.getId());
+    }
+
+    @Test
+    public void testEmail() {
+        User user = new User();
+        String emailValue = "user@somedomen.com";
+        user.setEmail(emailValue);
+        assertEquals(emailValue, user.getEmail());
+    }
+
+    @Test
     public void testTaskAssociation() {
         User user = new User();
         Task task1 = new Task();
