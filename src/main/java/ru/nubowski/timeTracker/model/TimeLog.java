@@ -9,8 +9,11 @@ public class TimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "start_time")
     private LocalDateTime startTime;
+    @Column(name = "end_time")
     private LocalDateTime endTime;
+
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;

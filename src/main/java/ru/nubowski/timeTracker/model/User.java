@@ -1,21 +1,25 @@
 package ru.nubowski.timeTracker.model;
-
 import jakarta.persistence.*;
 
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
+// @Table ??
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "name")
     private String name;
+    @Column(name = "email")
     private String email;
     @OneToMany(mappedBy = "user")
-    private List<Task> tasks;
+    private Set<Task> tasks = new HashSet<>();
 
-    // Constructors later on
+    // Constructors ?
+
 
     public Long getId() {
         return id;
@@ -41,11 +45,11 @@ public class User {
         this.email = email;
     }
 
-    public List<Task> getTasks() {
+    public Set<Task> getTasks() {
         return tasks;
     }
 
-    public void setTasks(List<Task> tasks) {
+    public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
     }
 }

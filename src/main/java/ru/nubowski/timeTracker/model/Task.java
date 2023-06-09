@@ -2,18 +2,25 @@ package ru.nubowski.timeTracker.model;
 
 import jakarta.persistence.*;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Entity
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "name")
     private String name;
+    @Column(name = "description")
     private String description;
     @ManyToOne // TODO read about one-to-many and vice versa for DB
     @JoinColumn(name = "user_id", nullable = false) // TODO check withing the project (was OK)
     private User user;
+
+    @OneToMany(mappedBy = "task")
+    private Set<TimeLog> timeLogs = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -47,14 +54,11 @@ public class Task {
         this.user = user;
     }
 
-    public List<timeLog> getTimeLogs() {
+    public Set<TimeLog> getTimeLogs() {
         return timeLogs;
     }
 
-    public void setTimeLogs(List<timeLog> timeLogs) {
+    public void setTimeLogs(Set<TimeLog> timeLogs) {
         this.timeLogs = timeLogs;
     }
-
-    @OneToMany(mappedBy = "task")
-    private List<timeLog> timeLogs;
 }
