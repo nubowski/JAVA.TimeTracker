@@ -64,6 +64,10 @@ public class UserTest {
         assertFalse(user.getTasks().contains(task1));
         assertTrue(user.getTasks().contains(task2));
         assertEquals(1, user.getTasks().size());
-
     }
+
+    // DB way testing of User
+    // TODO: MAKE A @TRANSACTION or separate testDB?
+    // replace to service package
+
 }
