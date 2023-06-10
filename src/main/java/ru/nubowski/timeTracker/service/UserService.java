@@ -1,6 +1,9 @@
 package ru.nubowski.timeTracker.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.nubowski.timeTracker.exception.UserNotFoundException;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.UserRepository;
 
@@ -9,6 +12,7 @@ import java.util.List;
 
 @Service // TODO do not fockup with @annotation as the previous time
 public class UserService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final TaskService taskService;
     private final TimeLogService timeLogService;
@@ -20,30 +24,41 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
+        LOGGER.debug("Getting all users");
         return userRepository.findAll();
     }
 
     // findById is not a bad workaround, just let it be dummy
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        LOGGER.debug("Getting user by id: {}", id);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public User getUser(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        LOGGER.debug("Getting user by username: {}", username);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
     }
 
     public User saveUser(User user) {
+        LOGGER.info("Saving user: {}", user.getUsername());
         return userRepository.save(user);
     }
 
     public void deleteUser(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        LOGGER.info("Deleting user: {}", username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
         userRepository.delete(user);
     }
 
-    // for constantly delete `user` TODO: check @Autowired vs construction injection with `final` keyword
+    // for constantly delete `user`
+    // TODO: check @Autowired vs construction injection with `final` keyword
     public void deleteUserAndTasks(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        LOGGER.info("Deleting user and associated tasks: {}", username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
         user.getTasks().forEach(task -> {
                 timeLogService.deleteTimeLogsForUser(user);
                 taskService.deleteTask(task.getId());
@@ -52,6 +67,7 @@ public class UserService {
     }
 
     public void deleteOldUsers(LocalDateTime cutoff) {
+        LOGGER.info("Deleting users created before {}", cutoff);
         List<User> oldUsers = userRepository.findByCreatedAtBefore(cutoff);
         userRepository.deleteAll(oldUsers);
     }

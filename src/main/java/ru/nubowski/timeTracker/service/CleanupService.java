@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import ru.nubowski.timeTracker.config.CleanupProperties;
+import ru.nubowski.timeTracker.exception.CleanupFailedException;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +31,9 @@ public class CleanupService {
             timeLogService.deleteOldTimeLogs(cutoff);
             userService.deleteOldUsers(cutoff);
             LOGGER.info("Cleanup completed successfully");
-        } catch (Exception e) {
+        } catch (CleanupFailedException e) { // TODO: some research of how it should be in LIVE
+            LOGGER.error("Cleanup failed due to a specific problem", e);
+        } catch (Exception e) { // It is not necessary, just for showcase
             LOGGER.error("Cleanup failed", e);
         }
     }
