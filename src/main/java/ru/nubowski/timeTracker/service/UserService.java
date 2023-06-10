@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service // TODO do not fockup with @annotation as the previous time
 public class UserService {
-    private final static Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+    private static final  Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final TaskService taskService;
     private final TimeLogService timeLogService;

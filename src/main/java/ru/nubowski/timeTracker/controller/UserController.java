@@ -2,6 +2,8 @@
 
 package ru.nubowski.timeTracker.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -21,34 +24,50 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUsers());
+        LOGGER.info("Received request to get all users");
+        List<User> users = userService.getAllUsers();
+        LOGGER.info("Responding with {} users", users.size());
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{username}")
     public ResponseEntity<User> getUser(@PathVariable String username) {
-        return ResponseEntity.ok(userService.getUser(username));
+        LOGGER.info("Received request to get user with username: {}", username);
+        User user = userService.getUser(username);
+        LOGGER.info("Responding with user {}", user);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
+        LOGGER.info("Received request to create user: {}", user);
+        User createdUser = userService.saveUser(user);
+        LOGGER.info("Responding with username: {}", createdUser.getUsername());
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
     @PutMapping("/{username}")
     public ResponseEntity<User> updateUser(@PathVariable String username, @RequestBody User user) {
+        LOGGER.info("Received request to update user with username: {} with data {}", username, user);
         user.setUsername(username);
-        return ResponseEntity.ok(userService.saveUser(user));
+        User updatedUser = userService.saveUser(user);
+        LOGGER.info("Updated user with username: {}", updatedUser.getUsername());
+        return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping("/{username}")
     public ResponseEntity<Void> deleteUser(@PathVariable String username) {
+        LOGGER.info("Received request to delete user with username: {}", username);
         userService.deleteUser(username);
+        LOGGER.info("Deleted user with username: {}", username);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{username}/tasks")
     public ResponseEntity<Void> deleteUserAndTasks(@PathVariable String username) {
+        LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
         userService.deleteUserAndTasks(username);
+        LOGGER.info("Deleted user with username: {} and all their tasks", username);
         return ResponseEntity.noContent().build();
     }
 

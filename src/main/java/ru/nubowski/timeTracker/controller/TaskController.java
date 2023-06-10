@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
-    private final static Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
+    private static final  Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
     private final TaskService taskService;
 
     public TaskController(TaskService taskService) {

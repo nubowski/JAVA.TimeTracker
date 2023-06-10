@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 public class TaskService {
-    private final static Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
+    private static final  Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
     private final TaskRepository taskRepository;
 
     public TaskService(TaskRepository taskRepository) {
