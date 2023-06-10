@@ -1,6 +1,7 @@
 package ru.nubowski.timeTracker.model;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,6 +17,9 @@ public class User {
     private String displayName;  // dummy if we ll need a display name (aka, names, etc)
     @Column(name = "email")
     private String email;
+
+    @Column
+    private LocalDateTime createdAt;
     @OneToMany(mappedBy = "user")
     private Set<Task> tasks = new HashSet<>();
 

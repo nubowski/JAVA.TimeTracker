@@ -2,6 +2,7 @@ package ru.nubowski.timeTracker.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,6 +16,9 @@ public class Task {
     private String name;
     @Column(name = "description")
     private String description;
+
+    @Column
+    private LocalDateTime createdAt;
     @ManyToOne // TODO read about one-to-many and vice versa for DB
     @JoinColumn(name = "user_id", nullable = false) // TODO check withing the project (was OK)
     private User user;
@@ -28,6 +32,14 @@ public class Task {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getName() {
