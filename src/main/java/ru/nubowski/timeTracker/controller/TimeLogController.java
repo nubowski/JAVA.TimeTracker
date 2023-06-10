@@ -32,7 +32,7 @@ public class TimeLogController {
         return new ResponseEntity<>(timeLogService.saveTimeLog(timeLog), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTimeLog(@PathVariable Long id) {
         timeLogService.deleteTimeLog(id);
         return ResponseEntity.noContent().build();
