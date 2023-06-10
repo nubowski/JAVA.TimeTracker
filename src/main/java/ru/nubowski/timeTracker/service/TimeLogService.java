@@ -78,4 +78,9 @@ public class TimeLogService {
             timeLogRepository.save(timeLog);
         });
     }
+
+    public void deleteOldTimeLogs(LocalDateTime cutoff) {
+        List<TimeLog> oldTimeLogs = timeLogRepository.findByStartTimeBefore(cutoff);
+        timeLogRepository.deleteAll(oldTimeLogs);
+    }
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.repository.TaskRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,5 +29,10 @@ public class TaskService {
 
     public void deleteTask (Long id) {
         taskRepository.deleteById(id);
+    }
+
+    public void deleteOldTasks(LocalDateTime cutoff) {
+        List<Task> oldTasks = taskRepository.findByCreatedAtBefore(cutoff);
+        taskRepository.deleteAll(oldTasks);
     }
 }

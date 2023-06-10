@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service // TODO do not fockup with @annotation as the previous time
@@ -48,5 +49,10 @@ public class UserService {
                 taskService.deleteTask(task.getId());
         });
         userRepository.delete(user);
+    }
+
+    public void deleteOldUsers(LocalDateTime cutoff) {
+        List<User> oldUsers = userRepository.findByCreatedAtBefore(cutoff);
+        userRepository.deleteAll(oldUsers);
     }
 }

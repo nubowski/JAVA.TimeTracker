@@ -7,6 +7,7 @@ import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.model.User;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,8 @@ public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
     Optional<TimeLog> findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc (Task task); // What The Hell ??? Is THAT naming (done by convention xDD)
     List<TimeLog> findByEndTimeIsNull();
     List<TimeLog> findByTaskUser(User user);
+
+    List<TimeLog> findByStartTimeBefore(LocalDateTime cutoff);
 
     // method to fetch TimeLogs by user and data range TODO: too complex and unreadable. To think
     @Query("SELECT t FROM TimeLog t WHERE t.task.user = :user AND ((t.startTime BETWEEN :start AND :end) OR (t.endTime BETWEEN :start AND :end))")
