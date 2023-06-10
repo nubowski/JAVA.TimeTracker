@@ -21,7 +21,6 @@ public class TimeLogController {
         this.taskService = taskService;
     }
 
-
     @PostMapping("/start/{taskId}")
     public ResponseEntity<TimeLog> startTask(@PathVariable Long taskId) {
         Task task = taskService.getTask(taskId);

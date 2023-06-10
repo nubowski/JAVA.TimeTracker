@@ -1,5 +1,6 @@
 package ru.nubowski.timeTracker.service;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
@@ -47,5 +48,14 @@ public class TimeLogService {
         timeLog.setEndTime(LocalDateTime.now());
         timeLog.setEndedByUser(true);
         return timeLogRepository.save(timeLog);
+    }
+
+    @Scheduled(cron = "0 59 23 * * ?")
+    public void autoEndTasks() {
+        List<TimeLog> ongoingTimeLog = timeLogRepository.findByEndTimeIsNull();
+        ongoingTimeLog.forEach(timeLog -> {
+            timeLog.setEndTime(LocalDateTime.now());
+            timeLogRepository.save(timeLog);
+        });
     }
 }
