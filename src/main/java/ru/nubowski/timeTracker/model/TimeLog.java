@@ -14,6 +14,9 @@ public class TimeLog {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+    @Column(name = "ended_by_user")
+    private boolean endedByUser;
+
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
@@ -48,5 +51,13 @@ public class TimeLog {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public boolean isEndedByUser() {
+        return endedByUser;
+    }
+
+    public void setEndedByUser(boolean endedByUser) {
+        this.endedByUser = endedByUser;
     }
 }
