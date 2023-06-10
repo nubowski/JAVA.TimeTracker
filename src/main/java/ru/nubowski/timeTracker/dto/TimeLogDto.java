@@ -2,6 +2,7 @@ package ru.nubowski.timeTracker.dto;
 
 import java.time.LocalDateTime;
 
+// dummy for later use
 public class TimeLogDto {
     private LocalDateTime start;
     private LocalDateTime end;
