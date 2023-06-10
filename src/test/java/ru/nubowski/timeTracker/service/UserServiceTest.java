@@ -29,11 +29,11 @@ public class UserServiceTest {
     public void testCreateUser() {
         User user = new User();
         user.setEmail("test@test.com");
-        user.setName("test");
+        user.setDisplayName("test");
         when(userRepository.save(any(User.class))).thenReturn(user);
         User savedUser = userService.saveUser(user);
         assertNotNull(savedUser);
-        assertEquals(user.getName(), savedUser.getName());
+        assertEquals(user.getDisplayName(), savedUser.getDisplayName());
         assertEquals(user.getEmail(), savedUser.getEmail());
     }
 
@@ -42,13 +42,13 @@ public class UserServiceTest {
     public void testGetUserById() {
         User user = new User();
         user.setEmail("test@test.com");
-        user.setName("test");
+        user.setDisplayName("test");
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
-        User userFromDb = userService.getUser(1L);
+        User userFromDb = userService.getUserById(1L);
         assertNotNull(userFromDb);
-        assertEquals(userFromDb.getName(), user.getName());
+        assertEquals(userFromDb.getDisplayName(), user.getDisplayName());
         assertEquals(userFromDb.getEmail(), user.getEmail());
     }
 
@@ -56,7 +56,7 @@ public class UserServiceTest {
     public void testUpdateUserEmail(){
         User user = new User();
         user.setEmail("test@test.com");
-        user.setName("testUser");
+        user.setDisplayName("testUser");
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
@@ -70,11 +70,11 @@ public class UserServiceTest {
     public void testUpdateUserName(){
         User user = new User();
         user.setEmail("test@test.com");
-        user.setName("testUser");
+        user.setDisplayName("testUser");
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
-        user.setName("updatedUser");
+        user.setDisplayName("updatedUser");
         userService.saveUser(user);
 
         verify(userRepository, times(1)).save(user);

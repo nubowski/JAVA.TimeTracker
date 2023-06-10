@@ -2,7 +2,6 @@ package ru.nubowski.timeTracker.model;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -11,8 +10,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "name")
-    private String name;
+    @Column(name = "username", unique = true)
+    private String username;
+    @Column(name = "display_name")
+    private String displayName;  // dummy if we ll need a display name (aka, names, etc)
     @Column(name = "email")
     private String email;
     @OneToMany(mappedBy = "user")
@@ -29,12 +30,12 @@ public class User {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDisplayName(String name) {
+        this.displayName = name;
     }
 
     public String getEmail() {
@@ -52,4 +53,9 @@ public class User {
     public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
     }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
+
 }

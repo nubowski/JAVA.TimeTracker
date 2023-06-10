@@ -14,13 +14,13 @@ public class UserTest {
     }
 
     @Test
-    void testNameBehavior() {
+    void testUsername() {
         // Arrange
-        String expectedName = "TestName";
+        String expectedUsername = "TestName";
         // Act
-        user.setName(expectedName);
+        user.setUsername(expectedUsername);
         // Assert
-        assertEquals(expectedName, user.getName());
+        assertEquals(expectedUsername, user.getUsername());
     }
 
     @Test
