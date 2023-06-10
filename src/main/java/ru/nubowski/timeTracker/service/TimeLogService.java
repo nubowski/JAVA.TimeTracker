@@ -7,6 +7,7 @@ import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.TimeLogRepository;
 
+import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,6 +53,12 @@ public class TimeLogService {
 
     public List<TimeLog> getTimeLogsByUserAndDateRange(User user, LocalDateTime start, LocalDateTime end) {
         return timeLogRepository.findByUserAndDateRange(user, start, end);
+    }
+
+    //  delete time logs
+    public void deleteTimeLogsForUser(User user) {
+        List<TimeLog> timeLogs = timeLogRepository.findByTaskUser(user);
+        timeLogRepository.deleteAll(timeLogs); // believed in the IDE and replace with the bulk... (!)
     }
 
     // trying streams to sum the duration

@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
     Optional<TimeLog> findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc (Task task); // What The Hell ??? Is THAT naming (done by convention xDD)
     List<TimeLog> findByEndTimeIsNull();
+    List<TimeLog> findByTaskUser(User user);
 
     // method to fetch TimeLogs by user and data range TODO: too complex and unreadable. To think
     @Query("SELECT t FROM TimeLog t WHERE t.task.user = :user AND ((t.startTime BETWEEN :start AND :end) OR (t.endTime BETWEEN :start AND :end))")
