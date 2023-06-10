@@ -42,7 +42,7 @@ public class UserServiceTest {
     public void testGetUserById() {
         User user = new User();
         user.setEmail("test@test.com");
-        user.setDisplayName("test");
+        user.setUsername("test");
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
@@ -56,7 +56,7 @@ public class UserServiceTest {
     public void testUpdateUserEmail(){
         User user = new User();
         user.setEmail("test@test.com");
-        user.setDisplayName("testUser");
+        user.setUsername("testUser");
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
@@ -67,14 +67,14 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testUpdateUserName(){
+    public void testUpdateUsername(){
         User user = new User();
         user.setEmail("test@test.com");
-        user.setDisplayName("testUser");
+        user.setUsername("testUser");
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
-        user.setDisplayName("updatedUser");
+        user.setUsername("updatedUser");
         userService.saveUser(user);
 
         verify(userRepository, times(1)).save(user);
