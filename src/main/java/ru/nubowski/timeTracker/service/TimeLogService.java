@@ -4,12 +4,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
+import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.TimeLogRepository;
 
-import java.sql.Time;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TimeLogService {
@@ -48,6 +48,19 @@ public class TimeLogService {
         timeLog.setEndTime(LocalDateTime.now());
         timeLog.setEndedByUser(true);
         return timeLogRepository.save(timeLog);
+    }
+
+    public List<TimeLog> getTimeLogsByUserAndDateRange(User user, LocalDateTime start, LocalDateTime end) {
+        return timeLogRepository.findByUserAndDateRange(user, start, end);
+    }
+
+    // trying streams to sum the duration
+    public Duration getTotalWorkEffortByUserAndDataRange(User user, LocalDateTime start, LocalDateTime end) {
+        return getTimeLogsByUserAndDateRange(user, start, end).stream()
+                .filter(timeLog -> timeLog.getEndTime() != null) // only existed real TimeLogs
+                .map(timeLog -> Duration.between(timeLog.getStartTime(), timeLog.getEndTime())) // trying to duration
+                .reduce(Duration::plus) // sum durations
+                .orElse(Duration.ZERO); // if no logs -> return ZERO
     }
 
     @Scheduled(cron = "0 59 23 * * ?")
