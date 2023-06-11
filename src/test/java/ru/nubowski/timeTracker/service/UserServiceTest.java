@@ -1,6 +1,5 @@
 package ru.nubowski.timeTracker.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 public class UserServiceTest {
 
-    @Autowired
-    private UserService userService;
+
 
     @MockBean
     private UserRepository userRepository;
@@ -35,10 +33,8 @@ public class UserServiceTest {
     @MockBean
     private TimeLogService timeLogService;
 
-    @BeforeEach
-    void setUp () {
-        userService = new UserService(userRepository, taskService, timeLogService);
-    }
+    @Autowired
+    private UserService userService;
 
     @Test
     void testGetAllUsers() {
