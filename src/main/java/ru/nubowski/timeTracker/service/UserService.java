@@ -43,6 +43,9 @@ public class UserService {
 
     public User saveUser(User user) {
         LOGGER.info("Saving user: {}", user.getUsername());
+        if (user.getId() == null) {
+            user.setCreatedAt(LocalDateTime.now()); // firstly created add timestamp
+        }
         return userRepository.save(user);
     }
 

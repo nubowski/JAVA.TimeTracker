@@ -26,6 +26,20 @@ public class User {
     // Constructors ?
 
 
+    @Override
+    public String toString() {
+        return "User { " +
+                "id = " + id +
+                ", username = '" + username + '\'' +
+                ", displayName = '" + displayName + '\'' +
+                ", email = '" + email + '\'' +
+                ", createdAt = " + createdAt +
+                ", tasks size = " + (tasks != null ? tasks.size() : 0) +
+                " }";
+    }
+
+
+
     public Long getId() {
         return id;
     }
@@ -62,4 +76,11 @@ public class User {
 
     public void setUsername(String username) { this.username = username; }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
