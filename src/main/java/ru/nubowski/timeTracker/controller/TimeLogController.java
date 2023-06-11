@@ -150,4 +150,13 @@ public class TimeLogController {
         LOGGER.info("Task with id {} has been paused", taskId);
         return ResponseEntity.ok(timeLog);
     }
+
+    @PostMapping("/resume/{taskId}")
+    public ResponseEntity<TimeLog> resumeTask(@PathVariable Long taskId) {
+        LOGGER.info("Received request to resume task with id {}", taskId);
+        Task task = taskService.getTask(taskId);
+        TimeLog timeLog = timeLogService.resumeTask(task);
+        LOGGER.info("Task with id {} has been resumed", taskId);
+        return ResponseEntity.ok(timeLog);
+    }
 }
