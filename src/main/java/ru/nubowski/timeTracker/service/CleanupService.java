@@ -34,8 +34,7 @@ public class CleanupService {
             LOGGER.info("Cleanup completed successfully");
         } catch (CleanupFailedException e) { // TODO: some research of how it should be in LIVE
             LOGGER.error("Cleanup failed due to a specific problem", e);
-        } catch (Exception e) { // It is not necessary, just for showcase
-            LOGGER.error("Cleanup failed", e);
+            throw e;
         }
     }
 }
