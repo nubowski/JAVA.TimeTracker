@@ -41,10 +41,10 @@ public class TimeLogControllerTest {
     @Transactional
     @Test
     void testOnGoingTaskTimeLeft () throws Exception {
-        // create new user too, because we have manyToOne to User column key
+        // manyToOne to User column key
         User user = new User();
         user.setUsername("test");
-        user = userService.saveUser(user);  // Save user first before setting it to task
+        user = userService.saveUser(user);  // save user first before setting it to task
 
         Task newTask = new Task();
         // some data
@@ -60,11 +60,62 @@ public class TimeLogControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        // Add a sleep here to simulate the passage of time
+        // simulate the passage of time
         Thread.sleep(5000);
 
         Duration durationElapsed = timeLogService.getTaskTimeElapsed(createdTask);
         LOGGER.info("Duration elapsed for the task: {}", durationElapsed.toMillis());
+
+        // request to stop
+        mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        TimeLog stoppedTimeLog = timeLogService.getLastTimeLogForTask(createdTask);
+        assertNotNull(stoppedTimeLog.getEndTime());
+
+        Duration duration = Duration.between(stoppedTimeLog.getStartTime(), stoppedTimeLog.getEndTime());
+        LOGGER.info("Total duration of the task: {}", duration.toMillis());
+    }
+
+    @Transactional
+    @Test
+    void testStartAndStopTask() throws Exception {
+        // create new user too, coz manyToOne column key
+        User user = new User();
+        user.setUsername("test");
+        user = userService.saveUser(user);  // saved before !
+
+        Task newTask = new Task();
+        // some data
+        newTask.setName("testTask");
+        newTask.setDescription("Some description to be sure it is working OK");
+        newTask.setUser(user);  //  user persisted entity
+        Task createdTask = taskService.saveTask(newTask);
+
+        LOGGER.info("About to test task start with task {}", createdTask.getId());
+
+        // request to start
+        mockMvc.perform(post("/time_logs/start/" + createdTask.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        // simulate the passage of time
+        Thread.sleep(5000);
+
+        Duration durationElapsedAfterStart = timeLogService.getTaskTimeElapsed(createdTask);
+        LOGGER.info("Duration elapsed after start: {}", durationElapsedAfterStart.toMillis());
+
+        // request to pause
+        mockMvc.perform(post("/time_logs/pause/" + createdTask.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // simulate the passage of time while the task is paused
+        Thread.sleep(5000);
+
+        Duration durationElapsedAfterPause = timeLogService.getTaskTimeElapsed(createdTask);
+        LOGGER.info("Duration elapsed after pause: {}", durationElapsedAfterPause.toMillis());
 
         // request to stop
         mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
