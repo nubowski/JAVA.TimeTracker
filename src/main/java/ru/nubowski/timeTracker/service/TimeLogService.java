@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.exception.OngoingTaskNotFoundException;
 import ru.nubowski.timeTracker.exception.TimeLogNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
+import ru.nubowski.timeTracker.model.TaskState;
 import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.TimeLogRepository;
@@ -50,11 +51,12 @@ public class TimeLogService {
         timeLogRepository.deleteById(id);
     }
 
-    public TimeLog startTask (Task task) {
-        LOGGER.info("Starting a task: {}", task.getId()); // TODO info = name, debug = low level (id, hash, etc:?)
+    public TimeLog startTask(Task task) {
+        LOGGER.info("Starting a task: {}", task.getId());
         TimeLog timeLog = new TimeLog();
         timeLog.setTask(task);
         timeLog.setStartTime(LocalDateTime.now());
+        timeLog.setTaskState(TaskState.ONGOING);
         return timeLogRepository.save(timeLog);
     }
 
@@ -63,7 +65,7 @@ public class TimeLogService {
         TimeLog timeLog = timeLogRepository.findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc(task). // perfect naming ^-^
                 orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
         timeLog.setEndTime(LocalDateTime.now());
-        timeLog.setEndedByUser(true);
+        timeLog.setTaskState(TaskState.USER_STOPPED);
         return timeLogRepository.save(timeLog);
     }
 
@@ -92,9 +94,10 @@ public class TimeLogService {
     @Scheduled(cron = "0 59 23 * * ?")
     public void autoEndTasks() {
         LOGGER.info("Auto-ending ongoing tasks");
-        List<TimeLog> ongoingTimeLog = timeLogRepository.findByEndTimeIsNull();
+        List<TimeLog> ongoingTimeLog = timeLogRepository.findByEndTimeIsNullAndTaskStateEquals(TaskState.ONGOING);
         ongoingTimeLog.forEach(timeLog -> {
             timeLog.setEndTime(LocalDateTime.now());
+            timeLog.setTaskState(TaskState.AUTO_STOPPED);
             timeLogRepository.save(timeLog);
         });
     }
@@ -122,7 +125,7 @@ public class TimeLogService {
         TimeLog timeLog = timeLogRepository.findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc(task).
                 orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
         timeLog.setEndTime(LocalDateTime.now());
-        timeLog.setEndedByUser(false);
+        timeLog.setTaskState(TaskState.PAUSED);
         return timeLogRepository.save(timeLog);
     }
 }

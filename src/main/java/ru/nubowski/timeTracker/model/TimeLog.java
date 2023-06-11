@@ -17,6 +17,9 @@ public class TimeLog {
     @Column(name = "ended_by_user")
     private boolean endedByUser;
 
+    @Enumerated(EnumType.STRING)
+    private TaskState taskState;
+
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
@@ -55,6 +58,14 @@ public class TimeLog {
 
     public boolean isEndedByUser() {
         return endedByUser;
+    }
+
+    public TaskState getTaskState() {
+        return taskState;
+    }
+
+    public void setTaskState(TaskState taskState) {
+        this.taskState = taskState;
     }
 
     public void setEndedByUser(boolean endedByUser) {
