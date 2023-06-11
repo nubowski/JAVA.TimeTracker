@@ -37,20 +37,56 @@ public class UserControllerTest {
         user.setUsername("testAccount");
         user.setEmail("test@test.com");
         user.setDisplayName("test");
-
         LOGGER.info("About to test user creation with user {}", user.getUsername());
-
         // form the request..
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated());
         // assert user creation
-
         User createdUser = userService.getUser("testAccount");
         LOGGER.info("Created user is {}", createdUser);
         assertEquals(createdUser.getUsername(), "testAccount");
         assertEquals(createdUser.getEmail(), "test@test.com");
         assertEquals(createdUser.getDisplayName(), "test");
     }
+
+    @Transactional
+    @Test
+    void testUpdateUser() throws Exception {
+        // new user
+        User newUser = new User();
+        newUser.setUsername("userToUpdate");
+        newUser.setEmail("userToUpdate@test.com");
+        newUser.setDisplayName("Test User");
+        User savedUser = userService.saveUser(newUser);
+
+        // new user obj to for update
+        User updateUser = new User();
+        updateUser.setUsername("userToUpdate"); // did not touch the `username` coz it has to be more complex approach (as it is unique identity)
+        updateUser.setEmail("updatedEmail@test.com");
+        updateUser.setDisplayName("Updated User");
+
+        LOGGER.info("About to test user update with user {}", updateUser);
+
+        // send request
+        mockMvc.perform(put("/users/userToUpdate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateUser)))
+                .andExpect(status().isOk());
+
+        // fetch the updated user from db
+        User fetchedUser = userService.getUser("userToUpdate");
+        LOGGER.info("Fetched updated user is {}", fetchedUser);
+
+        // check if changes are OK TODO: add Equals for username if needed
+        assertEquals("updatedEmail@test.com", fetchedUser.getEmail());
+        assertEquals("Updated User", fetchedUser.getDisplayName());
+
+
+
+
+    }
+
+
 }
