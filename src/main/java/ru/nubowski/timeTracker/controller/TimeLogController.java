@@ -132,4 +132,13 @@ public class TimeLogController {
         LOGGER.info("Total work effort for user {} id date range from {} to {} is {}", username, start, end, totalWorkEffort);
         return ResponseEntity.ok(totalWorkEffort);
     }
+
+    @GetMapping("/task/{taskId}/time_elapsed")
+    public ResponseEntity<Duration> getTaskTimeElapsed(@PathVariable Long taskId) {
+        LOGGER.info("Received request to get time elapsed for task with id {}", taskId);
+        Task task = taskService.getTask(taskId);
+        Duration timeElapsed = timeLogService.getTaskTimeElapsed(task);
+        LOGGER.info("Time elapsed for task with id {} is {}", taskId, timeElapsed);
+        return ResponseEntity.ok(timeElapsed);
+    }
 }

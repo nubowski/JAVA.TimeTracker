@@ -104,4 +104,16 @@ public class TimeLogService {
         List<TimeLog> oldTimeLogs = timeLogRepository.findByStartTimeBefore(cutoff);
         timeLogRepository.deleteAll(oldTimeLogs);
     }
+
+    public TimeLog getLastTimeLogForTask(Task task) {
+        LOGGER.debug("Getting the last time log for task with id: {}", task.getId());
+        return timeLogRepository.findFirstByTaskOrderByStartTimeDesc(task);
+    }
+
+    public Duration getTaskTimeElapsed(Task task) {
+        LOGGER.debug("Getting time elapsed for task with id: {}", task.getId());
+        TimeLog timeLog = timeLogRepository.findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc(task)
+                .orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
+        return Duration.between(timeLog.getStartTime(), LocalDateTime.now());
+    }
 }

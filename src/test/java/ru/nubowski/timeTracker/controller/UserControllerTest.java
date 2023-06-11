@@ -82,11 +82,5 @@ public class UserControllerTest {
         // check if changes are OK TODO: add Equals for username if needed
         assertEquals("updatedEmail@test.com", fetchedUser.getEmail());
         assertEquals("Updated User", fetchedUser.getDisplayName());
-
-
-
-
     }
-
-
 }
