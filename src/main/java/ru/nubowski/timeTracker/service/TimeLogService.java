@@ -32,8 +32,8 @@ public class TimeLogService {
 
     public TimeLog getTimeLog(Long id) {
         LOGGER.debug("Getting time log with id: {}", id);
-        return timeLogRepository.findById(id).
-                orElseThrow(() -> new TimeLogNotFoundException(id));
+        return timeLogRepository.findById(id)
+                .orElseThrow(() -> new TimeLogNotFoundException(id));
     }
 
     public TimeLog saveTimeLog(TimeLog timeLog) {
@@ -44,6 +44,9 @@ public class TimeLogService {
     public void deleteTimeLog(Long id) {
         LOGGER.info("Deleting time log");
         LOGGER.debug("Deleting time log with id: {}", id); // mbe this is the way?? TODO check&ask must a better way..
+        if (!timeLogRepository.existsById(id)) {
+            throw new TimeLogNotFoundException(id);
+        }
         timeLogRepository.deleteById(id);
     }
 

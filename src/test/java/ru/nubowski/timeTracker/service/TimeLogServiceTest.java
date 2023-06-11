@@ -71,7 +71,20 @@ public class TimeLogServiceTest {
     }
 
     @Test
+    void testDeleteTimeLogSuccess() {
+        TimeLog timeLog = new TimeLog();
+        timeLog.setId(1L);
+
+        when(timeLogRepository.existsById(anyLong())).thenReturn(true);
+
+        timeLogService.deleteTimeLog(timeLog.getId());
+
+        verify(timeLogRepository, times(1)).deleteById(timeLog.getId());
+    }
+
+    @Test
     void testDeleteTimeLog() {
+        when(timeLogRepository.existsById(anyLong())).thenReturn(true);
         doNothing().when(timeLogRepository).deleteById(anyLong());
         timeLogService.deleteTimeLog(1L);
         verify(timeLogRepository, times(1)).deleteById(anyLong());
