@@ -5,10 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import ru.nubowski.timeTracker.config.CleanupProperties;
 
 @SpringBootApplication
 @EnableScheduling 	// for schedule tasks
-@EnableConfigurationProperties // not sure if TRUE by default
+@EnableConfigurationProperties(CleanupProperties.class) // not sure if TRUE by default
 public class TimeTrackerApplication {
 
 	public static void main(String[] args) {
