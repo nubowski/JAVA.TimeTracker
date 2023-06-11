@@ -74,8 +74,8 @@ public class CleanupServiceTest {
         assertThrows(CleanupFailedException.class, () -> cleanupService.cleanup());
 
         verify(taskService, times(1)).deleteOldTasks(any(LocalDateTime.class));
-        verify(userService, times(1)).deleteOldUsers(any(LocalDateTime.class));
-        verify(timeLogService, times(1)).deleteOldTimeLogs(any(LocalDateTime.class));
+        verify(userService, times(0)).deleteOldUsers(any(LocalDateTime.class));
+        verify(timeLogService, times(0)).deleteOldTimeLogs(any(LocalDateTime.class));
     }
 }
 

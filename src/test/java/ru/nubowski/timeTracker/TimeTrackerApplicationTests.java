@@ -9,5 +9,4 @@ class TimeTrackerApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
