@@ -14,7 +14,7 @@ public class UserTest {
     }
 
     @Test
-    void testUsername() {
+    public void testUsername() {        // `public` keyword is used below JUnit5 (keep in mind)
         // Arrange
         String expectedUsername = "TestName";
         // Act
@@ -24,7 +24,7 @@ public class UserTest {
     }
 
     @Test
-    public void testID() {
+    void testID() {
         User user = new User();
         Long idValue = 999L;
         user.setId(idValue);
@@ -32,7 +32,7 @@ public class UserTest {
     }
 
     @Test
-    public void testEmail() {
+    void testEmail() {
         User user = new User();
         String emailValue = "user@somedomen.com";
         user.setEmail(emailValue);
@@ -40,7 +40,7 @@ public class UserTest {
     }
 
     @Test
-    public void testTaskAssociation() {
+    void testTaskAssociation() {
         User user = new User();
         Task task1 = new Task();
         Task task2 = new Task();
