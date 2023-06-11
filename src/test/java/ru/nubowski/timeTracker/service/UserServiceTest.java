@@ -8,11 +8,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
+import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,10 +107,16 @@ public class UserServiceTest {
     @Test
     void testDeleteUserAndTasks() {
         User user = new User();
-        user.setUsername("username");
+        user.setUsername("wipe_test");
+        Task task1 = new Task();
+        task1.setId(1L);
+        Task task2 = new Task();
+        task2.setId(2L);
+        user.setTasks(new HashSet<>(Arrays.asList(task1, task2)));
+
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
 
-        userService.deleteUserAndTasks("username");
+        userService.deleteUserAndTasks("wipe_test");
 
         verify(userRepository, times(1)).delete(user);
         verify(taskService, times(user.getTasks().size())).deleteTask(anyLong());
