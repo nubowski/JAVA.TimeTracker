@@ -19,7 +19,7 @@ import ru.nubowski.timeTracker.service.UserService;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -80,7 +80,7 @@ public class TimeLogControllerTest {
 
     @Transactional
     @Test
-    void testStartAndStopTask() throws Exception {
+    void testStartPauseResumeAndStopTask() throws Exception {
         // create new user too, coz manyToOne column key
         User user = new User();
         user.setUsername("test");
@@ -98,7 +98,7 @@ public class TimeLogControllerTest {
         // request to start
         mockMvc.perform(post("/time_logs/start/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                        .andExpect(status().isCreated());
 
         // simulate the passage of time
         Thread.sleep(5000);
@@ -109,7 +109,7 @@ public class TimeLogControllerTest {
         // request to pause
         mockMvc.perform(post("/time_logs/pause/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                        .andExpect(status().isOk());
 
         // simulate the passage of time while the task is paused
         Thread.sleep(5000);
@@ -117,15 +117,34 @@ public class TimeLogControllerTest {
         Duration durationElapsedAfterPause = timeLogService.getTaskTimeElapsed(createdTask);
         LOGGER.info("Duration elapsed after pause: {}", durationElapsedAfterPause.toMillis());
 
+        // request to resume
+        mockMvc.perform(post("/time_logs/resume/" + createdTask.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk());
+
+        // simulate the passage of time after resuming
+        Thread.sleep(5000);
+
+        Duration durationElapsedAfterResume = timeLogService.getTaskTimeElapsed(createdTask)
+                .minus(durationElapsedAfterPause); // subtract the duration elapsed after pause
+        LOGGER.info("Duration elapsed after resume: {}", durationElapsedAfterResume.toMillis());
+
         // request to stop
         mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                        .andExpect(status().isOk());
 
         TimeLog stoppedTimeLog = timeLogService.getLastTimeLogForTask(createdTask);
         assertNotNull(stoppedTimeLog.getEndTime());
 
-        Duration duration = Duration.between(stoppedTimeLog.getStartTime(), stoppedTimeLog.getEndTime());
+        Duration duration = timeLogService.getTaskTimeElapsed(createdTask);
         LOGGER.info("Total duration of the task: {}", duration.toMillis());
+
+        long totalDurationMillis = duration.toMillis();
+        long expectedDurationMillis = durationElapsedAfterStart.plus(durationElapsedAfterResume).toMillis();
+        LOGGER.info("Expected duration of the task: {}", expectedDurationMillis);
+
+        long deltaMillis = Math.abs(totalDurationMillis - expectedDurationMillis);
+        assertTrue(deltaMillis <= 500, "The duration difference should be within 500 milliseconds");
     }
 }

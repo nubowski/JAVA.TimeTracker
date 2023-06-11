@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.exception.OngoingTaskNotFoundException;
+import ru.nubowski.timeTracker.exception.TaskNotFoundException;
 import ru.nubowski.timeTracker.exception.TaskNotPausedException;
 import ru.nubowski.timeTracker.exception.TimeLogNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
@@ -111,14 +112,24 @@ public class TimeLogService {
 
     public TimeLog getLastTimeLogForTask(Task task) {
         LOGGER.debug("Getting the last time log for task with id: {}", task.getId());
-        return timeLogRepository.findFirstByTaskOrderByStartTimeDesc(task);
+        return timeLogRepository.findFirstByTaskOrderByStartTimeDesc(task)
+                .orElseThrow(() -> new TimeLogNotFoundException(task.getId()));
     }
 
     public Duration getTaskTimeElapsed(Task task) {
         LOGGER.debug("Getting time elapsed for task with id: {}", task.getId());
-        TimeLog timeLog = timeLogRepository.findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc(task)
-                .orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
-        return Duration.between(timeLog.getStartTime(), LocalDateTime.now());
+        List<TimeLog> timeLogs = timeLogRepository.findByTaskOrderByStartTimeAsc(task);
+        if(timeLogs.isEmpty()) {
+            throw new TaskNotFoundException(task.getId());
+        }
+
+        Duration totalDuration = Duration.ZERO;
+        for(TimeLog timeLog : timeLogs) {
+            LocalDateTime end = (timeLog.getEndTime() != null) ? timeLog.getEndTime() : LocalDateTime.now();
+            Duration duration = Duration.between(timeLog.getStartTime(), end);
+            totalDuration = totalDuration.plus(duration);
+        }
+        return totalDuration;
     }
 
     public TimeLog pauseTask(Task task) {

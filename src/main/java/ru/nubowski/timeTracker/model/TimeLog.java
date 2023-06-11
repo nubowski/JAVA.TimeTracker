@@ -14,10 +14,11 @@ public class TimeLog {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "ended_by_user")
+    @Column(name = "ended_by_user") // DEPRECATED
     private boolean endedByUser;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "task_state")
     private TaskState taskState;
 
     @ManyToOne
