@@ -41,6 +41,21 @@ public class UserServiceTest {
     }
 
     @Test
+    void testGetAllUsers() {
+        User user1 = new User();
+        user1.setUsername("user1");
+        User user2 = new User();
+        user2.setUsername("user2");
+
+        when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
+
+        var users = userService.getAllUsers();
+
+        assertEquals(2, users.size());
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
     void testCreateUser() {
         User user = new User();
         user.setEmail("test@test.com");
