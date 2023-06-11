@@ -9,6 +9,7 @@ import ru.nubowski.timeTracker.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service // TODO do not fockup with @annotation as the previous time
 public class UserService {
@@ -43,7 +44,22 @@ public class UserService {
 
     public User saveUser(User user) {
         LOGGER.info("Saving user: {}", user.getUsername());
-        return userRepository.save(user);
+        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
+        if (existingUser.isPresent()) {
+            // if exists udp fields
+            User userToUpdate = existingUser.get();
+            userToUpdate.setDisplayName(user.getDisplayName());
+            userToUpdate.setEmail(user.getEmail());
+            userToUpdate.setTasks(user.getTasks());
+            // .. additional fields for update
+            return userRepository.save(userToUpdate);
+        } else {
+            // if not exists - create
+            if (user.getId() == null) {
+                user.setCreatedAt(LocalDateTime.now()); // firstly created add timestamp TODO: add to an update
+            }
+            return userRepository.save(user);
+        }
     }
 
     public void deleteUser(String username) {
