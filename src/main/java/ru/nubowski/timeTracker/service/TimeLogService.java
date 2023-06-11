@@ -116,4 +116,13 @@ public class TimeLogService {
                 .orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
         return Duration.between(timeLog.getStartTime(), LocalDateTime.now());
     }
+
+    public TimeLog pauseTask(Task task) {
+        LOGGER.info("Pausing task: {}", task.getId());
+        TimeLog timeLog = timeLogRepository.findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc(task).
+                orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
+        timeLog.setEndTime(LocalDateTime.now());
+        timeLog.setEndedByUser(false);
+        return timeLogRepository.save(timeLog);
+    }
 }

@@ -141,4 +141,13 @@ public class TimeLogController {
         LOGGER.info("Time elapsed for task with id {} is {}", taskId, timeElapsed);
         return ResponseEntity.ok(timeElapsed);
     }
+
+    @PostMapping("/pause/{taskId}")
+    public ResponseEntity<TimeLog> pauseTask(@PathVariable Long taskId) {
+        LOGGER.info("Received request to pause task with id {}", taskId);
+        Task task = taskService.getTask(taskId);
+        TimeLog timeLog = timeLogService.pauseTask(task);
+        LOGGER.info("Task with id {} has been paused", taskId);
+        return ResponseEntity.ok(timeLog);
+    }
 }
