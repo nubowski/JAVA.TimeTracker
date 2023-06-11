@@ -53,8 +53,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(TaskNotPausedException.class)
+    public ResponseEntity<String> handleTaskNotPaused(TaskNotPausedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

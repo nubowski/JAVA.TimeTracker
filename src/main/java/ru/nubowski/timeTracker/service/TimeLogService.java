@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.exception.OngoingTaskNotFoundException;
+import ru.nubowski.timeTracker.exception.TaskNotPausedException;
 import ru.nubowski.timeTracker.exception.TimeLogNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TaskState;
@@ -127,5 +128,18 @@ public class TimeLogService {
         timeLog.setEndTime(LocalDateTime.now());
         timeLog.setTaskState(TaskState.PAUSED);
         return timeLogRepository.save(timeLog);
+    }
+
+    public TimeLog resumeTask(Task task) {
+        LOGGER.info("Resuming task: {}", task.getId());
+        TimeLog pausedTimeLog = timeLogRepository.findFirstByTaskAndTaskStateOrderByStartTimeDesc(task, TaskState.PAUSED)
+                .orElseThrow(() -> new TaskNotPausedException(task.getId()));
+
+        TimeLog newTimeLog = new TimeLog();
+        newTimeLog.setTask(task);
+        newTimeLog.setStartTime(LocalDateTime.now());
+        newTimeLog.setTaskState(TaskState.ONGOING);
+
+        return timeLogRepository.save(newTimeLog);
     }
 }

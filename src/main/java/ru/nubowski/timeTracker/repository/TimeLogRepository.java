@@ -19,9 +19,8 @@ public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
 
     List<TimeLog> findByEndTimeIsNullAndTaskStateEquals(TaskState taskState);
     List<TimeLog> findByTaskUser(User user);
-
     List<TimeLog> findByStartTimeBefore(LocalDateTime cutoff);
-
+    Optional<TimeLog> findFirstByTaskAndTaskStateOrderByStartTimeDesc(Task task, TaskState taskState);
     TimeLog findFirstByTaskOrderByStartTimeDesc(Task task); // just in case of last log as is
 
     // method to fetch TimeLogs by user and data range TODO: too complex and unreadable. To think
