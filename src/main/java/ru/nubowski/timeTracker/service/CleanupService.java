@@ -3,11 +3,12 @@ package ru.nubowski.timeTracker.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.config.CleanupProperties;
 import ru.nubowski.timeTracker.exception.CleanupFailedException;
 
 import java.time.LocalDateTime;
-
+@Service
 public class CleanupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
     private final TaskService taskService;
