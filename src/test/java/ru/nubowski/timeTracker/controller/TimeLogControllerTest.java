@@ -1,9 +1,12 @@
 package ru.nubowski.timeTracker.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MvcResult;
 import ru.nubowski.timeTracker.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,11 +16,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
+import ru.nubowski.timeTracker.repository.TimeLogRepository;
 import ru.nubowski.timeTracker.service.TaskService;
 import ru.nubowski.timeTracker.service.TimeLogService;
 import ru.nubowski.timeTracker.service.UserService;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,6 +43,7 @@ public class TimeLogControllerTest {
     private TaskService taskService;
     @Autowired
     private UserService userService;
+
 
     @Transactional
     @Test
@@ -58,10 +65,10 @@ public class TimeLogControllerTest {
         // request to start
         mockMvc.perform(post("/time_logs/start/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                        .andExpect(status().isCreated());
 
         // simulate the passage of time
-        Thread.sleep(5000);
+        Thread.sleep(5000); // minus days minutes millis
 
         Duration durationElapsed = timeLogService.getTaskTimeElapsed(createdTask);
         LOGGER.info("Duration elapsed for the task: {}", durationElapsed.toMillis());
@@ -69,7 +76,7 @@ public class TimeLogControllerTest {
         // request to stop
         mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                        .andExpect(status().isOk());
 
         TimeLog stoppedTimeLog = timeLogService.getLastTimeLogForTask(createdTask);
         assertNotNull(stoppedTimeLog.getEndTime());
@@ -133,6 +140,8 @@ public class TimeLogControllerTest {
         mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());
+        List<TimeLog> timeLogsForTask = timeLogService.getAllTimeLogsForTask(createdTask);
+        LOGGER.info("TimeLogs are: {}", timeLogsForTask);
 
         TimeLog stoppedTimeLog = timeLogService.getLastTimeLogForTask(createdTask);
         assertNotNull(stoppedTimeLog.getEndTime());
@@ -147,4 +156,98 @@ public class TimeLogControllerTest {
         long deltaMillis = Math.abs(totalDurationMillis - expectedDurationMillis);
         assertTrue(deltaMillis <= 500, "The duration difference should be within 500 milliseconds");
     }
+
+    @Transactional
+    @Test
+    void testGetAllUserTasksInPeriodSortedByTimeSpent() throws Exception {
+        // create user
+        User user = new User();
+        user.setUsername("time_user");
+        user = userService.saveUser(user);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isCreated());
+
+        // create tasks
+
+        Task task1 = new Task();
+        task1.setName("testTask1");
+        task1.setDescription("Some description to be sure it is working OK");
+        task1.setUser(user);
+        task1 = taskService.saveTask(task1);
+
+        Task task2 = new Task();
+        task2.setName("testTask2");
+        task2.setDescription("Some description to be sure it is working OK");
+        task2.setUser(user);
+        task2 = taskService.saveTask(task2);
+
+        Task task3 = new Task();
+        task3.setName("testTask3");
+        task3.setDescription("Some description to be sure it is working OK");
+        task3.setUser(user);
+        task3 = taskService.saveTask(task3);
+        // emulate of start and stop tasks
+        // could be done by loop, but want to make it as clear as possible
+        // task1
+        mockMvc.perform(post("/time_logs/start/" + task1.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        Thread.sleep(2000);
+        mockMvc.perform(post("/time_logs/stop/" + task1.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        Thread.sleep(1000);
+
+        // task2
+        mockMvc.perform(post("/time_logs/start/" + task2.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        Thread.sleep(3000);
+        mockMvc.perform(post("/time_logs/stop/" + task2.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        Thread.sleep(1000);
+
+        // task3
+        mockMvc.perform(post("/time_logs/start/" + task3.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        Thread.sleep(1000);
+        mockMvc.perform(post("/time_logs/stop/" + task3.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        Thread.sleep(1000);
+
+        LOGGER.info("Tasks are created and initiated");
+
+        // get all tasks for user in a period
+        MvcResult mvcResult = mockMvc.perform(get("/time_logs/user/{username}/date_range?start={start}&end={end}",
+                        "time_user",
+                        LocalDateTime.now().minusDays(1).toString(),
+                        LocalDateTime.now().toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        // extract
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        List<String> returnedTasks = objectMapper.readValue(contentAsString, new TypeReference<>() {});
+        LOGGER.info("Returned tasks: {}", returnedTasks);
+
+        List<String> expectedTasks = List.of(
+                String.format("Interval: start to end, Task: %s, Duration: 00:03", task2.getName()), // task2 has 3 sec
+                String.format("Interval: start to end, Task: %s, Duration: 00:02", task1.getName()), // task1 has 2 sec
+                String.format("Interval: start to end, Task: %s, Duration: 00:01", task3.getName())  // task3 has 1 sec
+        );
+
+        assertEquals(expectedTasks, returnedTasks);
+
+
+    }
+
+
+
+
 }
