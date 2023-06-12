@@ -14,7 +14,6 @@ import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.TimeLogRepository;
 
-import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +36,11 @@ public class TimeLogService {
         LOGGER.debug("Getting time log with id: {}", id);
         return timeLogRepository.findById(id)
                 .orElseThrow(() -> new TimeLogNotFoundException(id));
+    }
+
+    public List<TimeLog> getAllTimeLogsForTask(Task task) {
+        LOGGER.debug("Getting all time logs of the task with id: {}", task.getId());
+        return timeLogRepository.findAllByTask(task);
     }
 
     public TimeLog saveTimeLog(TimeLog timeLog) {
@@ -73,7 +77,7 @@ public class TimeLogService {
 
     public List<TimeLog> getTimeLogsByUserAndDateRange(User user, LocalDateTime start, LocalDateTime end) {
         LOGGER.debug("Getting time logs for user {} between {} and {}", user.getUsername(), start, end); // we still have userID
-        return timeLogRepository.findByUserAndDateRange(user, start, end);
+        return timeLogRepository.findTimeLogByTaskUserAndStartTimeAfterAndEndTimeBefore(user, start, end);
     }
 
     //  delete time logs
@@ -96,9 +100,9 @@ public class TimeLogService {
     @Scheduled(cron = "0 59 23 * * ?")
     public void autoEndTasks() {
         LOGGER.info("Auto-ending ongoing tasks");
-        List<TimeLog> ongoingTimeLog = timeLogRepository.findByEndTimeIsNullAndTaskStateEquals(TaskState.ONGOING);
+        List<TimeLog> ongoingTimeLog = timeLogRepository.findByEndTimeIsNullAndTaskStateEquals(TaskState.ONGOING); // PAUSE
         ongoingTimeLog.forEach(timeLog -> {
-            timeLog.setEndTime(LocalDateTime.now());
+            timeLog.setEndTime(LocalDateTime.now()); // LocalDateTime out of loop --^ condition ONGOING on each + bulk
             timeLog.setTaskState(TaskState.AUTO_STOPPED);
             timeLogRepository.save(timeLog);
         });
@@ -116,7 +120,7 @@ public class TimeLogService {
                 .orElseThrow(() -> new TimeLogNotFoundException(task.getId()));
     }
 
-    public Duration getTaskTimeElapsed(Task task) {
+    public Duration getTaskTimeElapsed(Task task) { // TODO: old logs + ongoing
         LOGGER.debug("Getting time elapsed for task with id: {}", task.getId());
         List<TimeLog> timeLogs = timeLogRepository.findByTaskOrderByStartTimeAsc(task);
         if(timeLogs.isEmpty()) {

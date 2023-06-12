@@ -89,13 +89,15 @@ public class TimeLogController {
     }
 
     @GetMapping("/user/{username}/date_range")
-    public ResponseEntity<List<String>> getTimeLogsByUserAndDateRange(@PathVariable String username,
-                                                                      @RequestParam("start")
-                                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                                      LocalDateTime start,
-                                                                      @RequestParam("end")
-                                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                                      LocalDateTime end) {
+    public ResponseEntity<List<String>> getTimeLogsByUserAndDateRange(
+            @PathVariable String username,
+            @RequestParam("start")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime start,
+            @RequestParam("end")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime end) {
+
         LOGGER.info("Fetching time logs for user {} in date range from {} to {}", username, start, end);
         User user = userService.getUser(username);
         List<TimeLog> timeLogs = timeLogService.getTimeLogsByUserAndDateRange(user, start, end);
@@ -119,13 +121,15 @@ public class TimeLogController {
 
     // only completed TimeLogs, TODO: add a method for check and add ongoing tasks too
     @GetMapping("/user/{username}/work_effort")
-    public ResponseEntity<Duration> getTotalWorkEffortByUserAndDateRange(@PathVariable String username,
-                                                                         @RequestParam("start")
-                                                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                                         LocalDateTime start,
-                                                                         @RequestParam("end")
-                                                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                                         LocalDateTime end) {
+    public ResponseEntity<Duration> getTotalWorkEffortByUserAndDateRange(
+            @PathVariable String username,
+            @RequestParam("start")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime start,
+            @RequestParam("end")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime end) {
+
         LOGGER.info("Calculating total work effort for user {} in date range from {} to {}", username, start, end);
         User user = userService.getUser(username);
         Duration totalWorkEffort = timeLogService.getTotalWorkEffortByUserAndDataRange(user, start, end);
