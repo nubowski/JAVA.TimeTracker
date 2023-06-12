@@ -15,7 +15,15 @@ public class CustomClockProvider implements ClockProvider {
         return now;
     }
 
-    public void advancedBy(Duration duration) {
+    public void plusTime(Duration duration) {
         now = now.plus(duration);
+    }
+
+    public void minusTime(Duration duration) {
+        now = now.minus(duration);
+    }
+
+    public void resetTime() {
+        now = LocalDateTime.now();
     }
 }
