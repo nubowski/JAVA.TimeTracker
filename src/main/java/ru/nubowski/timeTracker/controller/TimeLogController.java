@@ -17,7 +17,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/time_logs")
@@ -96,20 +98,38 @@ public class TimeLogController {
             LocalDateTime start,
             @RequestParam("end")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime end) {
+            LocalDateTime end,
+            @RequestParam(value = "sort", required = false, defaultValue = "duration")
+            String sort) {
 
         LOGGER.info("Fetching time logs for user {} in date range from {} to {}", username, start, end);
         User user = userService.getUser(username);
         List<TimeLog> timeLogs = timeLogService.getTimeLogsByUserAndDateRange(user, start, end);
 
-        List<String> formattedTimeLogs = timeLogs.stream()
-                .sorted(Comparator.comparing(TimeLog::getStartTime))
-                .map(log -> {
-                    Duration duration = Duration.between(log.getStartTime(), log.getEndTime());
-                    return String.format("Interval: %s to %s, Task: %s, Duration: %02d:%02d",
-                            log.getStartTime().toString(),
-                            log.getEndTime().toString(),
-                            log.getTask().getName(),
+        // Sorting by start time
+        if (sort.equals("start_time")) {
+            timeLogs.sort(Comparator.comparing(TimeLog::getStartTime));
+        }
+
+        Map<Task, Long> durationsPerTask = timeLogs.stream()
+                .collect(Collectors.groupingBy(
+                        TimeLog::getTask,
+                        Collectors.summingLong(log -> Duration.between(log.getStartTime(), log.getEndTime()).toMillis())
+                ));
+
+        Stream<Map.Entry<Task, Long>> stream = durationsPerTask.entrySet().stream();
+
+        // by duration if requested
+        if (sort.equals("duration")) {
+            stream = stream.sorted(Map.Entry.<Task, Long>comparingByValue().reversed());
+        }
+
+        List<String> formattedTimeLogs = stream
+                .map(entry -> {
+                    Task task = entry.getKey();
+                    Duration duration = Duration.ofMillis(entry.getValue());
+                    return String.format("%s - %02d:%02d",
+                            task.getName(),
                             duration.toHours(),
                             duration.toMinutesPart());
                 })
@@ -118,6 +138,7 @@ public class TimeLogController {
         LOGGER.info("Fetched {} time logs for user {} in date range from {} to {}", formattedTimeLogs.size(), username, start,end);
         return ResponseEntity.ok(formattedTimeLogs);
     }
+
 
     // only completed TimeLogs, TODO: add a method for check and add ongoing tasks too
     @GetMapping("/user/{username}/work_effort")
