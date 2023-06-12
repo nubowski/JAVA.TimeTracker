@@ -14,8 +14,12 @@ public class TimeLog {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "ended_by_user")
+    @Column(name = "ended_by_user") // DEPRECATED
     private boolean endedByUser;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "task_state")
+    private TaskState taskState;
 
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
@@ -55,6 +59,14 @@ public class TimeLog {
 
     public boolean isEndedByUser() {
         return endedByUser;
+    }
+
+    public TaskState getTaskState() {
+        return taskState;
+    }
+
+    public void setTaskState(TaskState taskState) {
+        this.taskState = taskState;
     }
 
     public void setEndedByUser(boolean endedByUser) {
