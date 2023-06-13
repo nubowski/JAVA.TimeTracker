@@ -137,8 +137,7 @@ public class TimeLogControllerTest {
         // simulate the passage of time after resuming
         Thread.sleep(5000);
 
-        Duration durationElapsedAfterResume = timeLogService.getTaskTimeElapsed(createdTask)
-                .minus(durationElapsedAfterPause); // subtract the duration elapsed after pause
+        Duration durationElapsedAfterResume = timeLogService.getTaskTimeElapsed(createdTask);
         LOGGER.info("Duration elapsed after resume: {}", durationElapsedAfterResume.toMillis());
 
         // request to stop
@@ -155,7 +154,7 @@ public class TimeLogControllerTest {
         LOGGER.info("Total duration of the task: {}", duration.toMillis());
 
         long totalDurationMillis = duration.toMillis();
-        long expectedDurationMillis = durationElapsedAfterStart.plus(durationElapsedAfterResume).toMillis();
+        long expectedDurationMillis = durationElapsedAfterStart.toMillis() + durationElapsedAfterResume.toMillis();
         LOGGER.info("Expected duration of the task: {}", expectedDurationMillis);
 
         long deltaMillis = Math.abs(totalDurationMillis - expectedDurationMillis);
@@ -225,11 +224,6 @@ public class TimeLogControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isCreated());
         clockProvider.resetTime();
-        mockMvc.perform(post("/time_logs/stop/" + task3.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
-        clockProvider.resetTime();
-
         LOGGER.info("Tasks are created and initiated");
 
         // get all tasks for user in a period
@@ -252,8 +246,4 @@ public class TimeLogControllerTest {
 
         assertEquals(expectedTasks, returnedTasks);
     }
-
-
-
-
 }

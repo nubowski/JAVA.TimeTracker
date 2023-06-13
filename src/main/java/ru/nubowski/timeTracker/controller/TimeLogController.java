@@ -106,7 +106,7 @@ public class TimeLogController {
         User user = userService.getUser(username);
         List<TimeLog> timeLogs = timeLogService.getTimeLogsByUserAndDateRange(user, start, end);
 
-        // Sorting by start time
+        // by start time if requested
         if (sort.equals("start_time")) {
             timeLogs.sort(Comparator.comparing(TimeLog::getStartTime));
         }
@@ -114,7 +114,7 @@ public class TimeLogController {
         Map<Task, Long> durationsPerTask = timeLogs.stream()
                 .collect(Collectors.groupingBy(
                         TimeLog::getTask,
-                        Collectors.summingLong(log -> Duration.between(log.getStartTime(), log.getEndTime()).toMillis())
+                        Collectors.summingLong(log -> Duration.between(log.getStartTime(), log.getEndTime() != null ? log.getEndTime() : end.isBefore(LocalDateTime.now()) ? end : LocalDateTime.now()).toMillis())
                 ));
 
         Stream<Map.Entry<Task, Long>> stream = durationsPerTask.entrySet().stream();

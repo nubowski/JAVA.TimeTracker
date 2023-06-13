@@ -80,7 +80,12 @@ public class TimeLogService {
 
     public List<TimeLog> getTimeLogsByUserAndDateRange(User user, LocalDateTime start, LocalDateTime end) {
         LOGGER.debug("Getting time logs for user {} between {} and {}", user.getUsername(), start, end); // we still have userID
-        return timeLogRepository.findTimeLogByTaskUserAndStartTimeAfterAndEndTimeBefore(user, start, end);
+        // logs where startTime is after 'start' and (endTime is before 'end' or endTime is null)
+        List<TimeLog> completedTimeLogs = timeLogRepository.findTimeLogByTaskUserAndStartTimeAfterAndEndTimeBefore(user, start, end);
+        List<TimeLog> ongoingTimeLogs = timeLogRepository.findTimeLogByTaskUserAndStartTimeAfterAndEndTimeIsNull(user, start);
+        // both lists
+        completedTimeLogs.addAll(ongoingTimeLogs);
+        return completedTimeLogs;
     }
 
     //  delete time logs
@@ -105,7 +110,7 @@ public class TimeLogService {
         LOGGER.info("Auto-ending ongoing tasks");
         List<TimeLog> ongoingTimeLog = timeLogRepository.findByEndTimeIsNullAndTaskStateEquals(TaskState.ONGOING); // PAUSE
         ongoingTimeLog.forEach(timeLog -> {
-            timeLog.setEndTime(LocalDateTime.now()); // LocalDateTime out of loop --^ condition ONGOING on each + bulk
+            timeLog.setEndTime(LocalDateTime.now()); // TODO: LocalDateTime out of loop --^ condition ONGOING on each + bulk
             timeLog.setTaskState(TaskState.AUTO_STOPPED);
             timeLogRepository.save(timeLog);
         });
@@ -150,14 +155,7 @@ public class TimeLogService {
 
     public TimeLog resumeTask(Task task) {
         LOGGER.info("Resuming task: {}", task.getId());
-        TimeLog pausedTimeLog = timeLogRepository.findFirstByTaskAndTaskStateOrderByStartTimeDesc(task, TaskState.PAUSED)
-                .orElseThrow(() -> new TaskNotPausedException(task.getId()));
-
-        TimeLog newTimeLog = new TimeLog();
-        newTimeLog.setTask(task);
-        newTimeLog.setStartTime(clockProvider.now());
-        newTimeLog.setTaskState(TaskState.ONGOING);
-
-        return timeLogRepository.save(newTimeLog);
+//      Some logic here, if we need that. Semantically better view to save `resume` as a separate method for now.
+        return startTask(task);
     }
 }

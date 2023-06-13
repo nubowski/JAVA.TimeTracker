@@ -16,6 +16,8 @@ public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
     Optional<TimeLog> findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc (Task task); // What The Hell ??? Is THAT naming (done by convention xDD)
     List<TimeLog> findByEndTimeIsNull(); // DEPRECATED
     List<TimeLog> findTimeLogByTaskUserAndStartTimeAfterAndEndTimeBefore(User user, LocalDateTime start, LocalDateTime end);
+
+    List<TimeLog> findTimeLogByTaskUserAndStartTimeAfterAndEndTimeIsNull (User user, LocalDateTime start);
     List<TimeLog> findByEndTimeIsNullAndTaskStateEquals(TaskState taskState); // -> LIST
     List<TimeLog> findByTaskUser(User user);
     List<TimeLog> findByTaskOrderByStartTimeAsc(Task task);
