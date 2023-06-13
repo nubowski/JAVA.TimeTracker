@@ -26,4 +26,8 @@ public class CustomClockProvider implements ClockProvider {
     public void resetTime() {
         now = LocalDateTime.now();
     }
+
+    public LocalDateTime LocalTime() {
+        return LocalDateTime.now();
+    }
 }

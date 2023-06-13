@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.nubowski.timeTracker.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import ru.nubowski.timeTracker.repository.TimeLogRepository;
 import ru.nubowski.timeTracker.service.TaskService;
 import ru.nubowski.timeTracker.service.TimeLogService;
 import ru.nubowski.timeTracker.service.UserService;
+import ru.nubowski.timeTracker.util.CustomClockProvider;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -31,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class TimeLogControllerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeLogControllerTest.class);
     @Autowired
@@ -43,6 +46,8 @@ public class TimeLogControllerTest {
     private TaskService taskService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private CustomClockProvider clockProvider;
 
 
     @Transactional
@@ -132,8 +137,7 @@ public class TimeLogControllerTest {
         // simulate the passage of time after resuming
         Thread.sleep(5000);
 
-        Duration durationElapsedAfterResume = timeLogService.getTaskTimeElapsed(createdTask)
-                .minus(durationElapsedAfterPause); // subtract the duration elapsed after pause
+        Duration durationElapsedAfterResume = timeLogService.getTaskTimeElapsed(createdTask);
         LOGGER.info("Duration elapsed after resume: {}", durationElapsedAfterResume.toMillis());
 
         // request to stop
@@ -150,7 +154,7 @@ public class TimeLogControllerTest {
         LOGGER.info("Total duration of the task: {}", duration.toMillis());
 
         long totalDurationMillis = duration.toMillis();
-        long expectedDurationMillis = durationElapsedAfterStart.plus(durationElapsedAfterResume).toMillis();
+        long expectedDurationMillis = durationElapsedAfterStart.toMillis() + durationElapsedAfterResume.toMillis();
         LOGGER.info("Expected duration of the task: {}", expectedDurationMillis);
 
         long deltaMillis = Math.abs(totalDurationMillis - expectedDurationMillis);
@@ -168,7 +172,7 @@ public class TimeLogControllerTest {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isCreated());
+                        .andExpect(status().isCreated());
 
         // create tasks
 
@@ -191,36 +195,35 @@ public class TimeLogControllerTest {
         task3 = taskService.saveTask(task3);
         // emulate of start and stop tasks
         // could be done by loop, but want to make it as clear as possible
+
         // task1
+        clockProvider.minusTime(Duration.ofHours(10));
         mockMvc.perform(post("/time_logs/start/" + task1.getId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
-        Thread.sleep(2000);
+        clockProvider.plusTime(Duration.ofMinutes(10));
         mockMvc.perform(post("/time_logs/stop/" + task1.getId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        Thread.sleep(1000);
+        clockProvider.resetTime();
 
         // task2
+        clockProvider.minusTime(Duration.ofDays(3));
         mockMvc.perform(post("/time_logs/start/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-        Thread.sleep(3000);
+                        .andExpect(status().isCreated());
+        clockProvider.plusTime(Duration.ofMinutes(49));
         mockMvc.perform(post("/time_logs/stop/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        Thread.sleep(1000);
+                        .andExpect(status().isOk());
+        clockProvider.resetTime();
 
         // task3
+        clockProvider.minusTime(Duration.ofHours(1));
         mockMvc.perform(post("/time_logs/start/" + task3.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-        Thread.sleep(1000);
-        mockMvc.perform(post("/time_logs/stop/" + task3.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        Thread.sleep(1000);
-
+                        .andExpect(status().isCreated());
+        clockProvider.resetTime();
         LOGGER.info("Tasks are created and initiated");
 
         // get all tasks for user in a period
@@ -237,17 +240,10 @@ public class TimeLogControllerTest {
         LOGGER.info("Returned tasks: {}", returnedTasks);
 
         List<String> expectedTasks = List.of(
-                String.format("Interval: start to end, Task: %s, Duration: 00:03", task2.getName()), // task2 has 3 sec
-                String.format("Interval: start to end, Task: %s, Duration: 00:02", task1.getName()), // task1 has 2 sec
-                String.format("Interval: start to end, Task: %s, Duration: 00:01", task3.getName())  // task3 has 1 sec
+                String.format("%s - 01:00", task3.getName()),
+                String.format("%s - 00:10", task1.getName())
         );
 
         assertEquals(expectedTasks, returnedTasks);
-
-
     }
-
-
-
-
 }
