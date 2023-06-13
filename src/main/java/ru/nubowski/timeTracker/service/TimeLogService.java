@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.exception.OngoingTaskNotFoundException;
 import ru.nubowski.timeTracker.exception.TaskNotFoundException;
-import ru.nubowski.timeTracker.exception.TaskNotPausedException;
 import ru.nubowski.timeTracker.exception.TimeLogNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TaskState;
@@ -89,9 +88,9 @@ public class TimeLogService {
     }
 
     //  delete time logs
-    public void deleteTimeLogsForUser(User user) {
-        LOGGER.info("Deleting time logs for user: {}", user.getUsername());
-        List<TimeLog> timeLogs = timeLogRepository.findByTaskUser(user);
+    public void deleteTimeLogsByTask(Task task) {
+        LOGGER.info("Deleting time logs for task: {}", task.getName());
+        List<TimeLog> timeLogs = timeLogRepository.findByTask(task);
         timeLogRepository.deleteAll(timeLogs); // believed in the IDE and replace with the bulk... (!)
     }
 

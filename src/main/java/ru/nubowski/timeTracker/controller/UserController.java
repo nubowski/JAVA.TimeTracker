@@ -62,7 +62,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{username}/tasks")
+    @DeleteMapping("/{username}/delete")
     public ResponseEntity<Void> deleteUserAndTasks(@PathVariable String username) {
         LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
         userService.deleteUserAndTasks(username);

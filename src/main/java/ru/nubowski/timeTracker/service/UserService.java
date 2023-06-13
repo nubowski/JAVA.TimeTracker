@@ -89,14 +89,12 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    // for constantly delete `user`
-    // TODO: check @Autowired vs construction injection with `final` keyword
     public void deleteUserAndTasks(String username) {
         LOGGER.info("Deleting user and associated tasks: {}", username);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
         user.getTasks().forEach(task -> {
-                timeLogService.deleteTimeLogsForUser(user);
+                timeLogService.deleteTimeLogsByTask(task);
                 taskService.deleteTask(task.getId());
         });
         userRepository.delete(user);

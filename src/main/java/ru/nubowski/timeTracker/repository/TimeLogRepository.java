@@ -25,11 +25,15 @@ public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
     Optional<TimeLog> findFirstByTaskAndTaskStateOrderByStartTimeDesc(Task task, TaskState taskState);
     Optional<TimeLog> findFirstByTaskOrderByStartTimeDesc(Task task); // just in case of last log as is
 
+    List<TimeLog> findByTask(Task task);
+
     List<TimeLog> findAllByTask(Task task);
 
     List<TimeLog> findByTaskOrderByStartTime (Task task); // DEPRECATED
 
     // method to fetch TimeLogs by user and data range TODO: too complex and unreadable. To think
     @Query("SELECT t FROM TimeLog t WHERE t.task.user = :user AND ((t.startTime BETWEEN :start AND :end) OR (t.endTime BETWEEN :start AND :end))")
-    List<TimeLog> findByUserAndDateRange(@Param("user") User user, @Param("start")LocalDateTime start, @Param("end") LocalDateTime end);
+    List<TimeLog> findByUserAndDateRange(@Param("user") User user, @Param("start")LocalDateTime start, @Param("end") LocalDateTime end); // DEPRECATED
+
+
 }
