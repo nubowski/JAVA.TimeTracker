@@ -1,5 +1,7 @@
 package ru.nubowski.timeTracker.userCaseTests;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.temporal.ChronoUnit;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -25,7 +27,9 @@ import ru.nubowski.timeTracker.service.UserService;
 import ru.nubowski.timeTracker.util.CustomClockProvider;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -85,6 +89,7 @@ public class UserTestCase {
         user.setUsername("time_user");
         user.setEmail("user@test.com");
         user.setDisplayName("nagibator9000");
+        user = userService.saveUser(user);
 
         // request to create the user
         MvcResult result = mockMvc.perform(post("/users")
@@ -116,7 +121,83 @@ public class UserTestCase {
         assertEquals(createdUser.getDisplayName(), userAfterUpdate.getDisplayName());
     }
 
-    // начать отсчет времени по задаче Х
+    // начать отсчет времени по задаче Х прекратить отсчет времени по задаче Х
+    @Transactional
+    @Test
+    void testUserStartAndStopTask() throws Exception {
+        // create user
+        User user = new User();
+        user.setUsername("time_user");
+        user.setEmail("user@test.com");
+        user.setDisplayName("nagibator9000");
+        user = userService.saveUser(user);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isCreated());
+
+        // create task
+        Task task = new Task();
+        task.setName("testTask1");
+        task.setDescription("Some description to be sure it is working OK");
+        task.setUser(user);
+        task = taskService.saveTask(task);
+
+        mockMvc.perform(post("/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(task)))
+                .andExpect(status().isCreated());
+
+        // time before starting the task
+        LocalDateTime expectedStart = clockProvider.now();
+
+        mockMvc.perform(post("/time_logs/start/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        Thread.sleep(2000);
+
+        // time after stopping the task and sync with LocalDateTime
+        LocalDateTime expectedEnd = clockProvider.now();
+
+        mockMvc.perform(post("/time_logs/stop/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        MvcResult result = mockMvc.perform(get("/time_logs/task/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // extract response
+        String content = result.getResponse().getContentAsString();
+
+        // create an ObjectMapper configured to handle Java 8 date/time types
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
+        // deserialize content
+        List<TimeLog> timeLogs = objectMapper.readValue(content, new TypeReference<List<TimeLog>>(){});
+
+        // for each TimeLog, compare start and end times with expected times
+        for (TimeLog timeLog : timeLogs) {
+            LocalDateTime actualStart = timeLog.getStartTime();
+            LocalDateTime actualEnd = timeLog.getEndTime();
+
+            // Allow a margin of error (2 seconds in this example)
+            long startDiff = ChronoUnit.MILLIS.between(actualStart, expectedStart);
+            long endDiff = ChronoUnit.MILLIS.between(actualEnd, expectedEnd);
+
+            LOGGER.info("Expected start time: {} and Received start time: {}", expectedStart, actualStart);
+            LOGGER.info("Expected stop time: {} and Received stop time: {}", expectedEnd, actualEnd);
+
+            assertTrue(Math.abs(startDiff) <= 800, "Start time is not within expected range");
+            assertTrue(Math.abs(endDiff) <= 800, "End time is not within expected range");
+        }
+    }
+
+
 
 
     // показать все трудозатраты пользователя Y за период N..M в виде связного списка Задача - Сумма

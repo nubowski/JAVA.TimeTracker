@@ -67,6 +67,15 @@ public class TimeLogController {
         return ResponseEntity.ok(timeLogs);
     }
 
+    @GetMapping("/task/{taskId}")
+    public ResponseEntity<List<TimeLog>> getTimeLogsByTask(@PathVariable Long taskId) {
+        LOGGER.info("Received request to get time logs for task with id {}", taskId);
+        Task task = taskService.getTask(taskId);
+        List<TimeLog> timeLogs = timeLogService.getAllTimeLogsForTask(task);
+        LOGGER.info("Responding with {} time logs for task with id {}", timeLogs.size(), taskId);
+        return ResponseEntity.ok(timeLogs);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TimeLog> getTimeLog(@PathVariable Long id) {
         LOGGER.info("Received request to get time log with id {}", id);
