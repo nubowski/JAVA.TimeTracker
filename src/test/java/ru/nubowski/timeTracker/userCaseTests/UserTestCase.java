@@ -51,6 +51,7 @@ public class UserTestCase {
     @Autowired
     private CustomClockProvider clockProvider;
 
+    // создать пользователя трекинга
     @Transactional
     @Test
     void testUserCreation () throws Exception {
@@ -75,7 +76,47 @@ public class UserTestCase {
         assertEquals(user.getDisplayName(), returnedUser.getDisplayName());
     }
 
-    
+    // изменить данные пользователя
+    @Transactional
+    @Test
+    void testUserUpdating () throws Exception {
+        // create user
+        User user = new User();
+        user.setUsername("time_user");
+        user.setEmail("user@test.com");
+        user.setDisplayName("nagibator9000");
+
+        // request to create the user
+        MvcResult result = mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        User createdUser = objectMapper.readValue(result.getResponse().getContentAsString(), User.class);
+        LOGGER.debug("User with username {} added to DB", createdUser.getUsername());
+
+        // update user
+        User updatedUser = new User();
+        updatedUser.setUsername(user.getUsername()); // use the same username
+        updatedUser.setEmail("newemail@test.com"); // updated email and null display name
+
+        // request to update the user
+        MvcResult resultUpdated = mockMvc.perform(put("/users/" + createdUser.getUsername())  // use put request here
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedUser)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        User userAfterUpdate = objectMapper.readValue(resultUpdated.getResponse().getContentAsString(), User.class);
+        LOGGER.debug("User with username {} updated", userAfterUpdate.getUsername());
+
+        // assert
+        assertEquals("newemail@test.com", userAfterUpdate.getEmail());
+        assertEquals(createdUser.getDisplayName(), userAfterUpdate.getDisplayName());
+    }
+
+    // начать отсчет времени по задаче Х
 
 
     // показать все трудозатраты пользователя Y за период N..M в виде связного списка Задача - Сумма
