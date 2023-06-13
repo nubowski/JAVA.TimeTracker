@@ -51,6 +51,32 @@ public class UserTestCase {
     @Autowired
     private CustomClockProvider clockProvider;
 
+    @Transactional
+    @Test
+    void testUserCreation () throws Exception {
+        User user = new User();
+        user.setUsername("time_user");
+        user.setEmail("user@test.com");
+        user.setDisplayName("nagibator9000");
+        user = userService.saveUser(user);
+        LOGGER.debug("User with username {} saved", user.getUsername());
+        MvcResult mvcResult = mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        LOGGER.debug("User with username {} added to DB", user.getUsername());
+
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        User returnedUser = objectMapper.readValue(contentAsString, User.class);
+
+        assertEquals(user.getUsername(), returnedUser.getUsername());
+        assertEquals(user.getEmail(), returnedUser.getEmail());
+        assertEquals(user.getDisplayName(), returnedUser.getDisplayName());
+    }
+
+    
+
 
     // показать все трудозатраты пользователя Y за период N..M в виде связного списка Задача - Сумма
     // затраченного времени в виде (чч:мм), сортировка по времени поступления в трекер (для ответа
