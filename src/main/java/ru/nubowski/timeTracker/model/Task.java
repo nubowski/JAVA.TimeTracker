@@ -19,11 +19,11 @@ public class Task {
 
     @Column
     private LocalDateTime createdAt;
-    @ManyToOne // TODO read about one-to-many and vice versa for DB
+    @ManyToOne(fetch = FetchType.LAZY) // TODO read about one-to-many and vice versa for DB
     @JoinColumn(name = "user_id", nullable = false) // TODO check withing the project (was OK)
     private User user;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private Set<TimeLog> timeLogs = new HashSet<>();
 
     public Long getId() {

@@ -12,4 +12,6 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository <Task, Long> {
     List<Task> findByCreatedAtBefore(LocalDateTime cutoff);
+
+    List<Task> findByUserId (Long id);
 }

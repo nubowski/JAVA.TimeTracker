@@ -20,10 +20,9 @@ public class User {
 
     @Column
     private LocalDateTime createdAt;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Set<Task> tasks = new HashSet<>();
 
-    // Constructors ?
 
 
     @Override
