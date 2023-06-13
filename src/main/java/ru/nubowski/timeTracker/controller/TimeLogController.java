@@ -15,6 +15,7 @@ import ru.nubowski.timeTracker.service.UserService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +101,9 @@ public class TimeLogController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime end,
             @RequestParam(value = "sort", required = false, defaultValue = "duration")
-            String sort) {
+            String sort,
+            @RequestParam(value = "output", required = false, defaultValue = "duration")
+            String output) {
 
         LOGGER.info("Fetching time logs for user {} in date range from {} to {}", username, start, end);
         User user = userService.getUser(username);
@@ -124,18 +127,29 @@ public class TimeLogController {
             stream = stream.sorted(Map.Entry.<Task, Long>comparingByValue().reversed());
         }
 
-        List<String> formattedTimeLogs = stream
-                .map(entry -> {
-                    Task task = entry.getKey();
-                    Duration duration = Duration.ofMillis(entry.getValue());
-                    return String.format("%s - %02d:%02d",
-                            task.getName(),
-                            duration.toHours(),
-                            duration.toMinutesPart());
-                })
-                .collect(Collectors.toList());
+        List<String> formattedTimeLogs;
 
-        LOGGER.info("Fetched {} time logs for user {} in date range from {} to {}", formattedTimeLogs.size(), username, start,end);
+        // choose output format
+        if (output.equals("duration")) {
+            formattedTimeLogs = stream
+                    .map(entry -> {
+                        Task task = entry.getKey();
+                        Duration duration = Duration.ofMillis(entry.getValue());
+                        return String.format("%s - %02d:%02d",
+                                task.getName(),
+                                duration.toHours(),
+                                duration.toMinutesPart());
+                    })
+                    .collect(Collectors.toList());
+        } else {  // "interval"
+            formattedTimeLogs = timeLogs.stream()
+                    .map(log -> String.format("%s - %s : %s",
+                            log.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                            log.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                            log.getTask().getName()))
+                    .collect(Collectors.toList());
+        }
+        LOGGER.info("Fetched {} time logs for user {} in date range from {} to {}", formattedTimeLogs.size(), username, start, end);
         return ResponseEntity.ok(formattedTimeLogs);
     }
 
