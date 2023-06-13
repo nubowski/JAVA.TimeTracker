@@ -21,7 +21,7 @@ public class ClockProviderTest {
     @Test
     void timeTest () {
         LOGGER.info("LocalDate: {}", LocalDateTime.now());
-        LOGGER.info("CustomDate: {}", clockProvider.now());
+        LOGGER.info("CustomDate: {}", clockProvider.LocalTime());
 
     }
 

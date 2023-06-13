@@ -150,7 +150,8 @@ public class UserTestCase {
                 .andExpect(status().isCreated());
 
         // time before starting the task
-        LocalDateTime expectedStart = clockProvider.now();
+        LocalDateTime expectedStart = clockProvider.LocalTime();
+        clockProvider.resetTime();
 
         mockMvc.perform(post("/time_logs/start/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -159,7 +160,8 @@ public class UserTestCase {
         Thread.sleep(2000);
 
         // time after stopping the task and sync with LocalDateTime
-        LocalDateTime expectedEnd = clockProvider.now();
+        LocalDateTime expectedEnd = clockProvider.LocalTime();
+        clockProvider.resetTime();
 
         mockMvc.perform(post("/time_logs/stop/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
