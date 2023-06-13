@@ -2,14 +2,19 @@ package ru.nubowski.timeTracker.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service // TODO do not fockup with @annotation as the previous time
 public class UserService {
@@ -43,23 +48,38 @@ public class UserService {
     }
 
     public User saveUser(User user) {
+        if (user == null || user.getUsername() == null) {
+            throw new IllegalArgumentException("Username can't be null");
+        }
         LOGGER.info("Saving user: {}", user.getUsername());
         Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
         if (existingUser.isPresent()) {
-            // if exists udp fields
+            // if user exists, update fields
             User userToUpdate = existingUser.get();
-            userToUpdate.setDisplayName(user.getDisplayName());
-            userToUpdate.setEmail(user.getEmail());
-            userToUpdate.setTasks(user.getTasks());
-            // .. additional fields for update
+            BeanUtils.copyProperties(user, userToUpdate, getNullPropertyNames(user));
             return userRepository.save(userToUpdate);
         } else {
-            // if not exists - create
+            // if user doesn't exist - create
             if (user.getId() == null) {
-                user.setCreatedAt(LocalDateTime.now()); // firstly created add timestamp TODO: add to an update
+                user.setCreatedAt(LocalDateTime.now()); // first time created add timestamp
             }
             return userRepository.save(user);
         }
+    }
+
+    // utility method null properties in a bean
+    private static String[] getNullPropertyNames (Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<>();
+        for(java.beans.PropertyDescriptor pd : pds) {
+            // check if value of this property is null then add it to the collection
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) emptyNames.add(pd.getName());
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
     }
 
     public void deleteUser(String username) {

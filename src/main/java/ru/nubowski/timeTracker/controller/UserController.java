@@ -49,7 +49,6 @@ public class UserController {
     @PutMapping("/{username}")
     public ResponseEntity<User> updateUser(@PathVariable String username, @RequestBody User user) {
         LOGGER.info("Received request to update user with username: {} with data {}", username, user);
-        user.setUsername(username);
         User updatedUser = userService.saveUser(user);
         LOGGER.info("Updated user with username: {}", updatedUser.getUsername());
         return ResponseEntity.ok(updatedUser);
