@@ -6,8 +6,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
+import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.User;
+import ru.nubowski.timeTracker.repository.TaskRepository;
 import ru.nubowski.timeTracker.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -22,11 +25,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final TaskService taskService;
     private final TimeLogService timeLogService;
+    private final TaskRepository taskRepository;
 
-    public UserService(UserRepository userRepository, TaskService taskService, TimeLogService timeLogService) {
+    public UserService(UserRepository userRepository, TaskService taskService, TimeLogService timeLogService, TaskRepository taskRepository) {
         this.userRepository = userRepository;
         this.taskService = taskService;
         this.timeLogService = timeLogService;
+        this.taskRepository = taskRepository;
     }
 
     public List<User> getAllUsers() {
@@ -88,16 +93,26 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(username));
         userRepository.delete(user);
     }
-
+    @Transactional
     public void deleteUserAndTasks(String username) {
         LOGGER.info("Deleting user and associated tasks: {}", username);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
-        user.getTasks().forEach(task -> {
-                timeLogService.deleteTimeLogsByTask(task);
-                taskService.deleteTask(task.getId());
+
+        List<Task> tasks = taskRepository.findByUserId(user.getId());
+
+        tasks.forEach(task -> {
+            LOGGER.info("Deleting timeLogs for task: {}", task.getId());
+            timeLogService.deleteTimeLogsByTask(task);
+            LOGGER.info("TimeLogs deleted for task: {}", task.getId());
+            LOGGER.info("Deleting task: {}", task.getId());
+            taskService.deleteTask(task.getId());
+            LOGGER.info("Task deleted: {}", task.getId());
         });
+
+        LOGGER.info("Deleting user: {}", username);
         userRepository.delete(user);
+        LOGGER.info("User deleted: {}", username);
     }
 
     public void deleteOldUsers(LocalDateTime cutoff) {
