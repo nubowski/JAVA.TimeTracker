@@ -131,7 +131,9 @@ public class UserServiceTest {
 
         verify(userRepository, times(1)).delete(user);
         verify(taskService, times(user.getTasks().size())).deleteTask(anyLong());
-        verify(timeLogService, times(user.getTasks().size())).deleteTimeLogsForUser(user);
+        for(Task task: user.getTasks()){
+            verify(timeLogService, times(1)).deleteTimeLogsByTask(task);
+        }
     }
 
     @Test

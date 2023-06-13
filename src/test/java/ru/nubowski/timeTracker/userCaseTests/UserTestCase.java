@@ -199,9 +199,6 @@ public class UserTestCase {
         }
     }
 
-
-
-
     // показать все трудозатраты пользователя Y за период N..M в виде связного списка Задача - Сумма
     // затраченного времени в виде (чч:мм), сортировка по времени поступления в трекер (для ответа
     // на вопрос, На какие задачи я потратил больше времени)
@@ -376,4 +373,60 @@ public class UserTestCase {
         // Check if the expected and returned lists are equal
         assertEquals(expectedWorkIntervals, returnedWorkIntervals);
     }
+
+    // удалить всю информацию о пользователе Z
+    @Transactional
+    @Test
+    void testDeleteUser() throws Exception {
+        // create user
+        User user = new User();
+        user.setUsername("delete_user");
+        user.setEmail("user@test.com");
+        user.setDisplayName("nagibator9000");
+        user = userService.saveUser(user);
+
+        // create task
+        Task task = new Task();
+        task.setName("testTask1");
+        task.setDescription("Some description to be sure it is working OK");
+        task.setUser(user);
+        task = taskService.saveTask(task);
+
+
+        mockMvc.perform(post("/time_logs/start/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        Thread.sleep(500);
+        clockProvider.resetTime(); // sync CustomTimeClockProvider
+
+        mockMvc.perform(post("/time_logs/stop/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        clockProvider.resetTime();
+
+        // deleting user request
+        mockMvc.perform(delete("/users/" + user.getUsername() + "/delete")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // try to get the user
+        MvcResult resultUser = mockMvc.perform(get("/users/" + user.getUsername())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        MvcResult resultTask = mockMvc.perform(get("/tasks/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        MvcResult resultTimeLog = mockMvc.perform(get("/time_logs/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        // returned status should be 404 (Not Found)
+        assertEquals(404, resultTimeLog.getResponse().getStatus(), "TimeLog was not deleted successfully");
+        assertEquals(404, resultTask.getResponse().getStatus(), "Task was not deleted successfully");
+        assertEquals(404, resultUser.getResponse().getStatus(), "User was not deleted successfully");
+    }
+
 }
