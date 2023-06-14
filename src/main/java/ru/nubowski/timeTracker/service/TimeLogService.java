@@ -164,8 +164,10 @@ public class TimeLogService {
     }
 
     public TimeLog resumeTask(Task task) {
+        TimeLog timeLog = timeLogRepository.findByTaskAndTaskState(task, TaskState.PAUSED).
+                orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
+        timeLog.setTaskState(TaskState.USER_STOPPED);
         LOGGER.info("Resuming task: {}", task.getId());
-//      Some logic here, if we need that. Semantically better view to save `resume` as a separate method for now.
         return startTask(task);
     }
 }

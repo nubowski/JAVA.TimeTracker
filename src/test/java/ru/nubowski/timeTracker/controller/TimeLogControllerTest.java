@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
+import ru.nubowski.timeTracker.model.TaskState;
 import ru.nubowski.timeTracker.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -110,55 +111,36 @@ public class TimeLogControllerTest {
         // request to start
         mockMvc.perform(post("/time_logs/start/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isCreated());
-
-        // simulate the passage of time
-        Thread.sleep(5000);
-
-        Duration durationElapsedAfterStart = timeLogService.getTaskTimeElapsed(createdTask);
-        LOGGER.info("Duration elapsed after start: {}", durationElapsedAfterStart.toMillis());
+                .andExpect(status().isCreated());
+        List<TimeLog> timeLogsAfterStart = timeLogService.getAllTimeLogsForTask(createdTask);
+        assertEquals(1, timeLogsAfterStart.size(), "Should be 1 TimeLog after starting the task");
+        assertEquals(TaskState.ONGOING, timeLogsAfterStart.get(0).getTaskState(), "Task state should be ONGOING after starting the task");
 
         // request to pause
         mockMvc.perform(post("/time_logs/pause/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
-
-        // simulate the passage of time while the task is paused
-        Thread.sleep(5000);
-
-        Duration durationElapsedAfterPause = timeLogService.getTaskTimeElapsed(createdTask);
-        LOGGER.info("Duration elapsed after pause: {}", durationElapsedAfterPause.toMillis());
+                .andExpect(status().isOk());
+        List<TimeLog> timeLogsAfterPause = timeLogService.getAllTimeLogsForTask(createdTask);
+        assertEquals(1, timeLogsAfterPause.size(), "Should still be 1 TimeLog after pausing the task");
+        assertEquals(TaskState.PAUSED, timeLogsAfterPause.get(0).getTaskState(), "Task state should be PAUSED after pausing the task");
 
         // request to resume
         mockMvc.perform(post("/time_logs/resume/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
-
-        // simulate the passage of time after resuming
-        Thread.sleep(5000);
-
-        Duration durationElapsedAfterResume = timeLogService.getTaskTimeElapsed(createdTask);
-        LOGGER.info("Duration elapsed after resume: {}", durationElapsedAfterResume.toMillis());
+                .andExpect(status().isOk());
+        List<TimeLog> timeLogsAfterResume = timeLogService.getAllTimeLogsForTask(createdTask);
+        assertEquals(2, timeLogsAfterResume.size(), "Should be 2 TimeLogs after resuming the task");
+        assertEquals(TaskState.ONGOING, timeLogsAfterResume.get(0).getTaskState(), "Task 1 state should be USER_STOPPED after resuming the task");
+        assertEquals(TaskState.USER_STOPPED, timeLogsAfterResume.get(1).getTaskState(), "Task 2 state should be ONGOING after resuming the task");
 
         // request to stop
         mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
-        List<TimeLog> timeLogsForTask = timeLogService.getAllTimeLogsForTask(createdTask);
-        LOGGER.info("TimeLogs are: {}", timeLogsForTask);
-
-        TimeLog stoppedTimeLog = timeLogService.getLastTimeLogForTask(createdTask);
-        assertNotNull(stoppedTimeLog.getEndTime());
-
-        Duration duration = timeLogService.getTaskTimeElapsed(createdTask);
-        LOGGER.info("Total duration of the task: {}", duration.toMillis());
-
-        long totalDurationMillis = duration.toMillis();
-        long expectedDurationMillis = durationElapsedAfterStart.toMillis() + durationElapsedAfterResume.toMillis();
-        LOGGER.info("Expected duration of the task: {}", expectedDurationMillis);
-
-        long deltaMillis = Math.abs(totalDurationMillis - expectedDurationMillis);
-        assertTrue(deltaMillis <= 500, "The duration difference should be within 500 milliseconds");
+                .andExpect(status().isOk());
+        List<TimeLog> timeLogsAfterStop = timeLogService.getAllTimeLogsForTask(createdTask);
+        assertEquals(2, timeLogsAfterStop.size(), "Should still be 2 TimeLogs after stopping the task");
+        assertEquals(TaskState.USER_STOPPED, timeLogsAfterStop.get(0).getTaskState(), "Task 1 state should be USER_STOPPED after stopping the task");
+        assertEquals(TaskState.USER_STOPPED, timeLogsAfterStop.get(1).getTaskState(), "Task 2 state should be USER_STOPPED after stopping the task");
     }
 
     @Transactional

@@ -25,6 +25,8 @@ public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
     List<TimeLog> findByEndTimeIsNullAndTaskStateEquals(TaskState taskState); // -> LIST
     @Query("SELECT t FROM TimeLog t WHERE t.task.user = :user AND ((t.startTime <= :end AND t.endTime >= :start) OR (t.endTime >= :start) OR (t.endTime is NULL AND t.startTime <= :end))")
     List<TimeLog> findTST (User user, LocalDateTime start, LocalDateTime end);
+
+    Optional<TimeLog> findByTaskAndTaskState(Task task, TaskState taskState);
     List<TimeLog> findByTaskUserAndStartTimeBeforeOrEndTimeAfter (User user, LocalDateTime start, LocalDateTime end);
     List<TimeLog> findByTaskUser(User user);
     List<TimeLog> findByTaskOrderByStartTimeAsc(Task task);
