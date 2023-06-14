@@ -2,6 +2,8 @@
 
 package ru.nubowski.timeTracker.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import ru.nubowski.timeTracker.service.UserService;
 import java.util.List;
 
 @RestController
+@Api(description = "User Controller")
 @RequestMapping("/users")
 public class UserController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
@@ -23,6 +26,7 @@ public class UserController {
     }
 
     @GetMapping
+    @ApiOperation(value = "This endpoint returns all users")
     public ResponseEntity<List<User>> getAllUsers(){
         LOGGER.info("Received request to get all users");
         List<User> users = userService.getAllUsers();
