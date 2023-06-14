@@ -11,6 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.nubowski.timeTracker.controller.TimeLogControllerTest;
+import ru.nubowski.timeTracker.dto.UserCreateRequest;
+import ru.nubowski.timeTracker.dto.UserUpdateRequest;
 import ru.nubowski.timeTracker.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -85,16 +87,15 @@ public class UserTestCase {
     @Test
     void testUserUpdating () throws Exception {
         // create user
-        User user = new User();
-        user.setUsername("time_user");
-        user.setEmail("user@test.com");
-        user.setDisplayName("nagibator9000");
-        ;
+        UserCreateRequest createUserRequest = new UserCreateRequest();
+        createUserRequest.setUsername("time_user");
+        createUserRequest.setEmail("user@test.com");
+        createUserRequest.setDisplayName("nagibator9000");
 
         // request to create the user
         MvcResult result = mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
+                        .content(objectMapper.writeValueAsString(createUserRequest)))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -102,14 +103,14 @@ public class UserTestCase {
         LOGGER.debug("User with username {} added to DB", createdUser.getUsername());
 
         // update user
-        User updatedUser = new User();
-        updatedUser.setUsername(user.getUsername()); // use the same username
-        updatedUser.setEmail("newemail@test.com"); // updated email and null display name
+        UserUpdateRequest updateUserRequest = new UserUpdateRequest();
+        updateUserRequest.setDisplayName("Vladimir Bot"); // updated display name
+        updateUserRequest.setEmail("newemail@test.com"); // updated email
 
         // request to update the user
         MvcResult resultUpdated = mockMvc.perform(put("/users/" + createdUser.getUsername())  // use put request here
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedUser)))
+                        .content(objectMapper.writeValueAsString(updateUserRequest)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -118,7 +119,7 @@ public class UserTestCase {
 
         // assert
         assertEquals("newemail@test.com", userAfterUpdate.getEmail());
-        assertEquals(createdUser.getDisplayName(), userAfterUpdate.getDisplayName());
+        assertEquals("Vladimir Bot", userAfterUpdate.getDisplayName());
     }
 
     // начать отсчет времени по задаче Х прекратить отсчет времени по задаче Х
