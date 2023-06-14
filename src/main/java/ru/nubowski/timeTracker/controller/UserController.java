@@ -1,5 +1,3 @@
-// TODO check 2 saved articles of controller usage with Spring approach
-
 package ru.nubowski.timeTracker.controller;
 
 import jakarta.validation.Valid;
@@ -9,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nubowski.timeTracker.dto.UserCreateRequest;
+import ru.nubowski.timeTracker.dto.UserUpdateRequest;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.service.UserService;
 
@@ -50,7 +49,6 @@ public class UserController {
         if (existingUser.isPresent()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-
         // if user doesn't exist
         User userToCreate = userService.mapToUser(request);
         User createdUser = userService.saveUser(userToCreate);
@@ -58,10 +56,17 @@ public class UserController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{username}")
-    public ResponseEntity<User> updateUser(@PathVariable String username, @RequestBody User user) {
-        LOGGER.info("Received request to update user with username: {} with data {}", username, user);
-        User updatedUser = userService.saveUser(user);
+    @PutMapping("/{username}") // TODO: all is good until username is unique entity, if not - auth/auth/another approach
+    public ResponseEntity<User> updateUser(@PathVariable String username, @Valid @RequestBody UserUpdateRequest request) {
+        LOGGER.info("Received request to update user with username: {} with data {}", username, request);
+
+        Optional<User> existingUser = userService.getUserByUsername(username);
+        if (existingUser.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        User userToUpdate = userService.mapToUpgradeUser(request, username);
+        User updatedUser = userService.saveUser(userToUpdate);
         LOGGER.info("Updated user with username: {}", updatedUser.getUsername());
         return ResponseEntity.ok(updatedUser);
     }

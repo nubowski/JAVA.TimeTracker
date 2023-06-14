@@ -8,6 +8,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nubowski.timeTracker.dto.UserCreateRequest;
+import ru.nubowski.timeTracker.dto.UserUpdateRequest;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.User;
@@ -122,6 +123,19 @@ public class UserService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setDisplayName(request.getDisplayName());
+        // set other..
+        return user;
+    }
+
+    public User mapToUpgradeUser(UserUpdateRequest request, String username) {
+        User user = new User();
+        user.setUsername(username);
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            user.setEmail(request.getEmail());
+        }
+        if (request.getDisplayName() != null && !request.getDisplayName().isEmpty()) {
+            user.setDisplayName(request.getDisplayName());
+        }
         // set other..
         return user;
     }
