@@ -27,6 +27,7 @@ import ru.nubowski.timeTracker.util.CustomClockProvider;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -149,64 +150,67 @@ public class TimeLogControllerTest {
         // create user
         User user = new User();
         user.setUsername("time_user");
-        user = userService.saveUser(user);
+        user.setDisplayName("nagibator9000");
+        user.setEmail("test@mail.com");
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                         .andExpect(status().isCreated());
 
-        // create tasks
+            // create tasks
 
-        Task task1 = new Task();
-        task1.setName("testTask1");
-        task1.setDescription("Some description to be sure it is working OK");
-        task1.setUser(user);
-        task1 = taskService.saveTask(task1);
+            User savedUser = userService.getUserByUsernameNotOptional(user.getUsername());
 
-        Task task2 = new Task();
-        task2.setName("testTask2");
-        task2.setDescription("Some description to be sure it is working OK");
-        task2.setUser(user);
-        task2 = taskService.saveTask(task2);
+            Task task1 = new Task();
+            task1.setName("testTask1");
+            task1.setDescription("Some description to be sure it is working OK");
+            task1.setUser(savedUser);
+            task1 = taskService.saveTask(task1);
 
-        Task task3 = new Task();
-        task3.setName("testTask3");
-        task3.setDescription("Some description to be sure it is working OK");
-        task3.setUser(user);
-        task3 = taskService.saveTask(task3);
-        // emulate of start and stop tasks
-        // could be done by loop, but want to make it as clear as possible
+            Task task2 = new Task();
+            task2.setName("testTask2");
+            task2.setDescription("Some description to be sure it is working OK");
+            task2.setUser(savedUser);
+            task2 = taskService.saveTask(task2);
 
-        // task1
-        clockProvider.minusTime(Duration.ofHours(10));
-        mockMvc.perform(post("/time_logs/start/" + task1.getId())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-        clockProvider.plusTime(Duration.ofMinutes(10));
-        mockMvc.perform(post("/time_logs/stop/" + task1.getId())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        clockProvider.resetTime();
+            Task task3 = new Task();
+            task3.setName("testTask3");
+            task3.setDescription("Some description to be sure it is working OK");
+            task3.setUser(savedUser);
+            task3 = taskService.saveTask(task3);
+            // emulate of start and stop tasks
+            // could be done by loop, but want to make it as clear as possible
 
-        // task2
-        clockProvider.minusTime(Duration.ofDays(3));
-        mockMvc.perform(post("/time_logs/start/" + task2.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isCreated());
-        clockProvider.plusTime(Duration.ofMinutes(49));
-        mockMvc.perform(post("/time_logs/stop/" + task2.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
-        clockProvider.resetTime();
+            // task1
+            clockProvider.minusTime(Duration.ofHours(10));
+            mockMvc.perform(post("/time_logs/start/" + task1.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isCreated());
+            clockProvider.plusTime(Duration.ofMinutes(10));
+            mockMvc.perform(post("/time_logs/stop/" + task1.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+            clockProvider.resetTime();
 
-        // task3
-        clockProvider.minusTime(Duration.ofHours(1));
-        mockMvc.perform(post("/time_logs/start/" + task3.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isCreated());
-        clockProvider.resetTime();
-        LOGGER.info("Tasks are created and initiated");
+            // task2
+            clockProvider.minusTime(Duration.ofDays(3));
+            mockMvc.perform(post("/time_logs/start/" + task2.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isCreated());
+            clockProvider.plusTime(Duration.ofMinutes(49));
+            mockMvc.perform(post("/time_logs/stop/" + task2.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+            clockProvider.resetTime();
+
+            // task3
+            clockProvider.minusTime(Duration.ofHours(1));
+            mockMvc.perform(post("/time_logs/start/" + task3.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isCreated());
+            clockProvider.resetTime();
+            LOGGER.info("Tasks are created and initiated");
 
         // get all tasks for user in a period
         MvcResult mvcResult = mockMvc.perform(get("/time_logs/user/{username}/date_range?start={start}&end={end}",

@@ -7,6 +7,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.nubowski.timeTracker.dto.UserCreateRequest;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.User;
@@ -93,35 +94,48 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(username));
         userRepository.delete(user);
     }
+
     @Transactional
-    public void deleteUserAndTasks(String username) {
+    public void deleteTimeLogsAndTasks(String username) {
         LOGGER.info("Deleting user and associated tasks: {}", username);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
-
         List<Task> tasks = taskRepository.findByUserId(user.getId());
-
         tasks.forEach(task -> {
-            LOGGER.info("Deleting timeLogs for task: {}", task.getId());
+            LOGGER.debug("Deleting timeLogs for task: {}", task.getId());
             timeLogService.deleteTimeLogsByTask(task);
-            LOGGER.info("TimeLogs deleted for task: {}", task.getId());
-            LOGGER.info("Deleting task: {}", task.getId());
+            LOGGER.debug("TimeLogs deleted for task: {}", task.getId());
+            LOGGER.debug("Deleting task: {}", task.getId());
             taskService.deleteTask(task.getId());
-            LOGGER.info("Task deleted: {}", task.getId());
+            LOGGER.debug("Task deleted: {}", task.getId());
         });
-
-        //        LOGGER.info("Deleting user: {}", username);
-        //        userRepository.delete(user);
-        //        LOGGER.info("User deleted: {}", username);
-    }
-
-    public void resetTimeLogsAndTasks(String username) {
-        LOGGER.info("Clearing all tracker history for user {}", username);
     }
 
     public void deleteOldUsers(LocalDateTime cutoff) {
         LOGGER.info("Deleting users created before {}", cutoff);
         List<User> oldUsers = userRepository.findByCreatedAtBefore(cutoff);
         userRepository.deleteAll(oldUsers);
+    }
+
+    public User mapToUser(UserCreateRequest request) {
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setDisplayName(request.getDisplayName());
+        // set other..
+        return user;
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public User getUserByUsernameNotOptional (String username) {
+        return userRepository.findUserByUsername(username);
+    }
+
+    public boolean userIsPresent(String username) {
+        Optional<User> checkUser = getUserByUsername(username);
+        return checkUser.isPresent();
     }
 }
