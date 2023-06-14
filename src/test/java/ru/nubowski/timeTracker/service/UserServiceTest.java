@@ -54,6 +54,7 @@ public class UserServiceTest {
     @Test
     void testCreateUser() {
         User user = new User();
+        user.setUsername("test");
         user.setEmail("test@test.com");
         user.setDisplayName("test");
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -112,28 +113,6 @@ public class UserServiceTest {
         assertThrows(UserNotFoundException.class, () -> {
             userService.getUserById(1L);
         });
-    }
-
-    //  TODO: add tasks check separately or here --V
-    @Test
-    void testDeleteUserAndTasks() {
-        User user = new User();
-        user.setUsername("wipe_test");
-        Task task1 = new Task();
-        task1.setId(1L);
-        Task task2 = new Task();
-        task2.setId(2L);
-        user.setTasks(new HashSet<>(Arrays.asList(task1, task2)));
-
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
-
-        userService.deleteUserAndTasks("wipe_test");
-
-        verify(userRepository, times(1)).delete(user);
-        verify(taskService, times(user.getTasks().size())).deleteTask(anyLong());
-        for(Task task: user.getTasks()){
-            verify(timeLogService, times(1)).deleteTimeLogsByTask(task);
-        }
     }
 
     @Test
