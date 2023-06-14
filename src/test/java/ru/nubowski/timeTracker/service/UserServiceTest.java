@@ -7,13 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
-import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -119,7 +117,7 @@ public class UserServiceTest {
     void testDeleteUserAndTasksUserNotFound() {
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class, () -> {
-            userService.deleteUserAndTasks("test_username");
+            userService.deleteTimeLogsAndTasks("test_username");
         });
     }
 

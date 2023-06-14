@@ -63,7 +63,7 @@ public class UserTestCase {
         user.setUsername("time_user");
         user.setEmail("user@test.com");
         user.setDisplayName("nagibator9000");
-        user = userService.saveUser(user);
+
         LOGGER.debug("User with username {} saved", user.getUsername());
         MvcResult mvcResult = mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ public class UserTestCase {
         user.setUsername("time_user");
         user.setEmail("user@test.com");
         user.setDisplayName("nagibator9000");
-        user = userService.saveUser(user);
+        ;
 
         // request to create the user
         MvcResult result = mockMvc.perform(post("/users")
@@ -130,18 +130,20 @@ public class UserTestCase {
         user.setUsername("time_user");
         user.setEmail("user@test.com");
         user.setDisplayName("nagibator9000");
-        user = userService.saveUser(user);
+
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated());
 
+        User savedUser = userService.getUserByUsernameNotOptional(user.getUsername());
+
         // create task
         Task task = new Task();
         task.setName("testTask1");
         task.setDescription("Some description to be sure it is working OK");
-        task.setUser(user);
+        task.setUser(savedUser);
         task = taskService.saveTask(task);
 
         mockMvc.perform(post("/tasks")
@@ -209,31 +211,34 @@ public class UserTestCase {
         // create user
         User user = new User();
         user.setUsername("time_user");
-        user = userService.saveUser(user);
+        user.setEmail("pupsa@kuksa.com");
+        user.setDisplayName("nagibator9000");
+
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                         .andExpect(status().isCreated());
 
+        User savedUser = userService.getUserByUsernameNotOptional(user.getUsername());
         // create tasks
 
         Task task1 = new Task();
         task1.setName("testTask1");
         task1.setDescription("Some description to be sure it is working OK");
-        task1.setUser(user);
+        task1.setUser(savedUser);
         task1 = taskService.saveTask(task1);
 
         Task task2 = new Task();
         task2.setName("testTask2");
         task2.setDescription("Some description to be sure it is working OK");
-        task2.setUser(user);
+        task2.setUser(savedUser);
         task2 = taskService.saveTask(task2);
 
         Task task3 = new Task();
         task3.setName("testTask3");
         task3.setDescription("Some description to be sure it is working OK");
-        task3.setUser(user);
+        task3.setUser(savedUser);
         task3 = taskService.saveTask(task3);
         // emulate of start and stop tasks
         // could be done by loop, but want to make it as clear as possible
@@ -299,24 +304,27 @@ public class UserTestCase {
         // create user
         User user = new User();
         user.setUsername("time_user");
-        user = userService.saveUser(user);
+        user.setEmail("user@test.com");
+        user.setDisplayName("nagibator9000");
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated());
 
+        User savedUser = userService.getUserByUsernameNotOptional(user.getUsername());
+
         // create tasks
         Task task1 = new Task();
         task1.setName("testTask1");
         task1.setDescription("Some description to be sure it is working OK");
-        task1.setUser(user);
+        task1.setUser(savedUser);
         task1 = taskService.saveTask(task1);
 
         Task task2 = new Task();
         task2.setName("testTask2");
         task2.setDescription("Some description to be sure it is working OK");
-        task2.setUser(user);
+        task2.setUser(savedUser);
         task2 = taskService.saveTask(task2);
 
         // task1
@@ -388,7 +396,8 @@ public class UserTestCase {
         // create user
         User user = new User();
         user.setUsername("time_user");
-        user = userService.saveUser(user);
+        user.setDisplayName("nagibator9000");
+        user.setEmail("poshlay@plusha.com");
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -396,29 +405,31 @@ public class UserTestCase {
                 .andExpect(status().isCreated());
         clockProvider.resetTime();
 
+        User savedUser = userService.getUserByUsernameNotOptional(user.getUsername());
+
         // create tasks
         Task task1 = new Task();
         task1.setName("testTask1");
         task1.setDescription("Some description to be sure it is working OK");
-        task1.setUser(user);
+        task1.setUser(savedUser);
         task1 = taskService.saveTask(task1);
 
         Task task2 = new Task();
         task2.setName("testTask2");
         task2.setDescription("Some description to be sure it is working OK");
-        task2.setUser(user);
+        task2.setUser(savedUser);
         task2 = taskService.saveTask(task2);
 
         Task task3 = new Task();
         task3.setName("testTask3");
         task3.setDescription("Some description to be sure it is working OK");
-        task3.setUser(user);
+        task3.setUser(savedUser);
         task3 = taskService.saveTask(task3);
 
         Task task4 = new Task();
         task4.setName("testTask4");
         task4.setDescription("Some description to be sure it is working OK");
-        task4.setUser(user);
+        task4.setUser(savedUser);
         task4 = taskService.saveTask(task4);
 
         // task1
