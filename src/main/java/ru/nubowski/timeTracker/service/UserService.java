@@ -110,9 +110,13 @@ public class UserService {
             LOGGER.info("Task deleted: {}", task.getId());
         });
 
-        LOGGER.info("Deleting user: {}", username);
-        userRepository.delete(user);
-        LOGGER.info("User deleted: {}", username);
+        //        LOGGER.info("Deleting user: {}", username);
+        //        userRepository.delete(user);
+        //        LOGGER.info("User deleted: {}", username);
+    }
+
+    public void resetTimeLogsAndTasks(String username) {
+        LOGGER.info("Clearing all tracker history for user {}", username);
     }
 
     public void deleteOldUsers(LocalDateTime cutoff) {

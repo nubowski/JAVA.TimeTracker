@@ -165,7 +165,7 @@ public class TimeLogController {
 
     // only completed TimeLogs, TODO: add a method for check and add ongoing tasks too
     @GetMapping("/user/{username}/work_effort")
-    public ResponseEntity<Duration> getTotalWorkEffortByUserAndDateRange(
+    public ResponseEntity<String> getTotalWorkEffortByUserAndDateRange(
             @PathVariable String username,
             @RequestParam("start")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -177,8 +177,9 @@ public class TimeLogController {
         LOGGER.info("Calculating total work effort for user {} in date range from {} to {}", username, start, end);
         User user = userService.getUser(username);
         Duration totalWorkEffort = timeLogService.getTotalWorkEffortByUserAndDataRange(user, start, end);
-        LOGGER.info("Total work effort for user {} id date range from {} to {} is {}", username, start, end, totalWorkEffort);
-        return ResponseEntity.ok(totalWorkEffort);
+        String formattedTotalWorkEffort = String.format("%02d:%02d", totalWorkEffort.toHours(), totalWorkEffort.toMinutesPart());
+        LOGGER.info("Total work effort for user {} in date range from {} to {} is {}", username, start, end, formattedTotalWorkEffort);
+        return ResponseEntity.ok(formattedTotalWorkEffort);
     }
 
     @GetMapping("/task/{taskId}/time_elapsed")

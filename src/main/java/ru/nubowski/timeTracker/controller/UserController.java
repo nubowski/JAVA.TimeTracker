@@ -67,7 +67,17 @@ public class UserController {
         LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
         userService.deleteUserAndTasks(username);
         LOGGER.info("Deleted user with username: {} and all their tasks", username);
+        userService.deleteUser(username); // doubt about double controller reset/delete, should be 1 with keys
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{username}/reset")
+    public ResponseEntity<User> resetTimeLogsAndTasks(@PathVariable String username) {
+        LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
+        userService.deleteUserAndTasks(username);
+        LOGGER.info("Deleted user with username: {} and all their tasks", username);
+        User user = userService.getUser(username);
+        return ResponseEntity.ok(user);
     }
 
 }

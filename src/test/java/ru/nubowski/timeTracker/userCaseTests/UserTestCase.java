@@ -374,6 +374,110 @@ public class UserTestCase {
         assertEquals(expectedWorkIntervals, returnedWorkIntervals);
     }
 
+    // показать сумму трудозатрат по всем задачам пользователя Y за период N..M
+    // 1. task startTime and endTime is between start-end (common case)
+    //  2. task startTime and endTime bot out of coverage (seldom, but we must handle this)
+    //  3. task started before coverage (startTime should be `start` for sum)
+    //  4. task closed after coverage (endTime should be `end` then)
+    //  5. task is ONGOING and do not have endTime
+    //      5.1 task is started before `start`
+    //      5.2 task is started between start-end
+    @Transactional
+    @Test
+    void testTotalWorkEffortByUserAndDateRange () throws Exception {
+        // create user
+        User user = new User();
+        user.setUsername("time_user");
+        user = userService.saveUser(user);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isCreated());
+        clockProvider.resetTime();
+
+        // create tasks
+        Task task1 = new Task();
+        task1.setName("testTask1");
+        task1.setDescription("Some description to be sure it is working OK");
+        task1.setUser(user);
+        task1 = taskService.saveTask(task1);
+
+        Task task2 = new Task();
+        task2.setName("testTask2");
+        task2.setDescription("Some description to be sure it is working OK");
+        task2.setUser(user);
+        task2 = taskService.saveTask(task2);
+
+        Task task3 = new Task();
+        task3.setName("testTask3");
+        task3.setDescription("Some description to be sure it is working OK");
+        task3.setUser(user);
+        task3 = taskService.saveTask(task3);
+
+        Task task4 = new Task();
+        task4.setName("testTask4");
+        task4.setDescription("Some description to be sure it is working OK");
+        task4.setUser(user);
+        task4 = taskService.saveTask(task4);
+
+        // task1
+        clockProvider.minusTime(Duration.ofHours(26));
+        mockMvc.perform(post("/time_logs/start/" + task1.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        clockProvider.plusTime(Duration.ofMinutes(127));
+        mockMvc.perform(post("/time_logs/stop/" + task1.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        clockProvider.resetTime();
+
+        // task2
+        clockProvider.minusTime(Duration.ofDays(3));
+        mockMvc.perform(post("/time_logs/start/" + task2.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        clockProvider.plusTime(Duration.ofMinutes(49));
+        mockMvc.perform(post("/time_logs/stop/" + task2.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        clockProvider.resetTime();
+
+        // task3
+        clockProvider.minusTime(Duration.ofDays(5));
+        mockMvc.perform(post("/time_logs/start/" + task3.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        clockProvider.plusTime(Duration.ofMinutes(264));
+        mockMvc.perform(post("/time_logs/stop/" + task3.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        clockProvider.resetTime();
+
+        // task4
+        clockProvider.minusTime(Duration.ofHours(25));
+        mockMvc.perform(post("/time_logs/start/" + task4.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        clockProvider.resetTime();
+
+        LOGGER.info("Tasks are created and initiated");
+
+        MvcResult mvcResult = mockMvc.perform(get("/time_logs/user/{username}/work_effort?start={start}&end={end}&",
+                        "time_user",
+                        LocalDateTime.now().minusDays(8).toString(),
+                        LocalDateTime.now().minusDays(1).toString())  // for a week with a 1 day before slice
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // total work effort is correct
+        String content = mvcResult.getResponse().getContentAsString();
+        String expectedWorkEffort = "08:13"; // total in HH:mm format, + task1 and task4 conditions (outOfCoverage + ONGOING)
+
+        assertEquals(expectedWorkEffort, content, "Total work effort was not calculated correctly");
+    }
+
     // удалить всю информацию о пользователе Z
     @Transactional
     @Test
@@ -429,4 +533,62 @@ public class UserTestCase {
         assertEquals(404, resultUser.getResponse().getStatus(), "User was not deleted successfully");
     }
 
+    @Transactional
+    @Test
+    void testResetUserTrackInfo() throws Exception {
+        // create user
+        User user = new User();
+        user.setUsername("reset_user");
+        user.setEmail("user@test.com");
+        user.setDisplayName("nagibator9000");
+        user = userService.saveUser(user);
+
+        // create task
+        Task task = new Task();
+        task.setName("testTask1");
+        task.setDescription("Some description to be sure it is working OK");
+        task.setUser(user);
+        task = taskService.saveTask(task);
+
+
+        mockMvc.perform(post("/time_logs/start/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        Thread.sleep(500);
+        clockProvider.resetTime(); // sync CustomTimeClockProvider
+
+        mockMvc.perform(post("/time_logs/stop/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        clockProvider.resetTime();
+
+        // deleting user request
+        mockMvc.perform(delete("/users/" + user.getUsername() + "/reset")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // try to get the user
+        MvcResult result = mockMvc.perform(delete("/users/" + user.getUsername() + "/reset")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        User returnedUser = objectMapper.readValue(result.getResponse().getContentAsString(), User.class);
+
+
+        MvcResult resultTask = mockMvc.perform(get("/tasks/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        MvcResult resultTimeLog = mockMvc.perform(get("/time_logs/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        // returned status should be 404 (Not Found)
+        assertEquals(404, resultTimeLog.getResponse().getStatus(), "TimeLog was not deleted successfully");
+        assertEquals(404, resultTask.getResponse().getStatus(), "Task was not deleted successfully");
+        assertEquals(user.getUsername(), returnedUser.getUsername(), "User was not returned correctly");
+    }
 }

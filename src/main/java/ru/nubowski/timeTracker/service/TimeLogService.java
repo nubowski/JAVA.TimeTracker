@@ -78,13 +78,8 @@ public class TimeLogService {
     }
 
     public List<TimeLog> getTimeLogsByUserAndDateRange(User user, LocalDateTime start, LocalDateTime end) {
-        LOGGER.debug("Getting time logs for user {} between {} and {}", user.getUsername(), start, end); // we still have userID
-        // logs where startTime is after 'start' and (endTime is before 'end' or endTime is null)
-        List<TimeLog> completedTimeLogs = timeLogRepository.findTimeLogByTaskUserAndStartTimeAfterAndEndTimeBefore(user, start, end);
-        List<TimeLog> ongoingTimeLogs = timeLogRepository.findTimeLogByTaskUserAndStartTimeAfterAndEndTimeIsNull(user, start);
-        // both lists
-        completedTimeLogs.addAll(ongoingTimeLogs);
-        return completedTimeLogs;
+        LOGGER.debug("Getting time logs for user {} between {} and {}", user.getUsername(), start, end);
+        return timeLogRepository.findTST(user, start, end);
     }
 
     //  delete time logs
@@ -96,12 +91,29 @@ public class TimeLogService {
 
     // trying streams to sum the duration
     public Duration getTotalWorkEffortByUserAndDataRange(User user, LocalDateTime start, LocalDateTime end) {
-        LOGGER.debug("Getting total work effort for username {} id {} between {} and {}",user.getUsername(), user.getId(),start, end);
+        LOGGER.info("Getting total work effort for username {} id {} between {} and {}", user.getUsername(), user.getId(), start, end);
         return getTimeLogsByUserAndDateRange(user, start, end).stream()
-                .filter(timeLog -> timeLog.getEndTime() != null) // only existed real TimeLogs
-                .map(timeLog -> Duration.between(timeLog.getStartTime(), timeLog.getEndTime())) // trying to duration
+                .map(timeLog -> getTaskDuration(timeLog, start, end)) // get task duration with handling of null end time and end time after end of range
                 .reduce(Duration::plus) // sum durations
                 .orElse(Duration.ZERO); // if no logs -> return ZERO
+    }
+
+    private Duration getTaskDuration(TimeLog timeLog, LocalDateTime start, LocalDateTime end) {
+        LOGGER.info("Getting task duration for {} with the start {} and  end {} name of {}", timeLog, timeLog.getStartTime(), timeLog.getEndTime(), timeLog.getTask().getName());
+        LocalDateTime startTime = timeLog.getStartTime().isBefore(start) ? start : timeLog.getStartTime();
+        LocalDateTime endTime = timeLog.getEndTime() != null ? timeLog.getEndTime() : end;
+
+        // if startTime after end or endTime before start, return zero
+        if (startTime.isAfter(end) || endTime.isBefore(start)) {
+            return Duration.ZERO;
+        }
+
+        // if endTime is after end, set it to end
+        if (endTime.isAfter(end)) {
+            endTime = end;
+        }
+
+        return Duration.between(startTime, endTime);
     }
 
     @Scheduled(cron = "0 59 23 * * ?")
@@ -133,7 +145,6 @@ public class TimeLogService {
         if(timeLogs.isEmpty()) {
             throw new TaskNotFoundException(task.getId());
         }
-
         Duration totalDuration = Duration.ZERO;
         for(TimeLog timeLog : timeLogs) {
             LocalDateTime end = (timeLog.getEndTime() != null) ? timeLog.getEndTime() : LocalDateTime.now();

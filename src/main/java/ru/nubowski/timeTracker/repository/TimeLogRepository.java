@@ -15,10 +15,17 @@ import java.util.Optional;
 public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
     Optional<TimeLog> findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc (Task task); // What The Hell ??? Is THAT naming (done by convention xDD)
     List<TimeLog> findByEndTimeIsNull(); // DEPRECATED
+
+    List<TimeLog> findTimeLogByTaskUserAndStartTimeBeforeAndEndTimeAfter(User user, LocalDateTime start, LocalDateTime end);
+
+    List<TimeLog> findTimeLogByTaskUserAndStartTimeBeforeAndEndTimeIsNull(User user, LocalDateTime end);
     List<TimeLog> findTimeLogByTaskUserAndStartTimeAfterAndEndTimeBefore(User user, LocalDateTime start, LocalDateTime end);
 
     List<TimeLog> findTimeLogByTaskUserAndStartTimeAfterAndEndTimeIsNull (User user, LocalDateTime start);
     List<TimeLog> findByEndTimeIsNullAndTaskStateEquals(TaskState taskState); // -> LIST
+    @Query("SELECT t FROM TimeLog t WHERE t.task.user = :user AND ((t.startTime <= :end AND t.endTime >= :start) OR (t.endTime >= :start) OR (t.endTime is NULL AND t.startTime <= :end))")
+    List<TimeLog> findTST (User user, LocalDateTime start, LocalDateTime end);
+    List<TimeLog> findByTaskUserAndStartTimeBeforeOrEndTimeAfter (User user, LocalDateTime start, LocalDateTime end);
     List<TimeLog> findByTaskUser(User user);
     List<TimeLog> findByTaskOrderByStartTimeAsc(Task task);
     List<TimeLog> findByStartTimeBefore(LocalDateTime cutoff);
