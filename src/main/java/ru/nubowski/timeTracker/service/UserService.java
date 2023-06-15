@@ -115,6 +115,9 @@ public class UserService {
     public void deleteOldUsers(LocalDateTime cutoff) {
         LOGGER.info("Deleting users created before {}", cutoff);
         List<User> oldUsers = userRepository.findByCreatedAtBefore(cutoff);
+        oldUsers.stream()
+                .map(User::getUsername)
+                .forEach(this::deleteTimeLogsAndTasks);
         userRepository.deleteAll(oldUsers);
     }
 

@@ -121,14 +121,16 @@ public class UserServiceTest {
         });
     }
 
-    @Test // isolated context of cleanup service
-    void testDeleteOldUsers(){
+    @Test
+    void testDeleteOldUsers() {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(1);
         User oldUser1 = new User();
         oldUser1.setUsername("old1");
         User oldUser2 = new User();
         oldUser2.setUsername("old2");
         when(userRepository.findByCreatedAtBefore(any(LocalDateTime.class))).thenReturn(Arrays.asList(oldUser1, oldUser2));
+        when(userRepository.findByUsername("old1")).thenReturn(Optional.of(oldUser1));
+        when(userRepository.findByUsername("old2")).thenReturn(Optional.of(oldUser2));
         userService.deleteOldUsers(cutoff);
         verify(userRepository, times(1)).deleteAll(Arrays.asList(oldUser1, oldUser2));
     }
