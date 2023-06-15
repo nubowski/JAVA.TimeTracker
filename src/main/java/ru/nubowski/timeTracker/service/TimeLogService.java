@@ -92,10 +92,7 @@ public class TimeLogService {
     // trying streams to sum the duration
     public Duration getTotalWorkEffortByUserAndDataRange(User user, LocalDateTime start, LocalDateTime end) {
         LOGGER.info("Getting total work effort for username {} id {} between {} and {}", user.getUsername(), user.getId(), start, end);
-        return getTimeLogsByUserAndDateRange(user, start, end).stream()
-                .map(timeLog -> getTaskDuration(timeLog, start, end)) // get task duration with handling of null end time and end time after end of range
-                .reduce(Duration::plus) // sum durations
-                .orElse(Duration.ZERO); // if no logs -> return ZERO
+        return Duration.ofSeconds(timeLogRepository.getTotalWorkEffortInSeconds(user.getId(), start, end));
     }
 
     private Duration getTaskDuration(TimeLog timeLog, LocalDateTime start, LocalDateTime end) {

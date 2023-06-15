@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "time_logs")
 public class TimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
