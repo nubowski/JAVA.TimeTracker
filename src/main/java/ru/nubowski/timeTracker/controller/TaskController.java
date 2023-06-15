@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nubowski.timeTracker.dto.TaskCreateRequest;
+import ru.nubowski.timeTracker.dto.TaskCreateResponse;
 import ru.nubowski.timeTracker.mapper.TaskMapper;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.service.impl.TaskService;
@@ -45,14 +46,14 @@ public class TaskController {
     }
 
     @PostMapping("/{username}")
-    public ResponseEntity<Task> createTask(@PathVariable String username, @Valid @RequestBody TaskCreateRequest request) {
+    public ResponseEntity<TaskCreateResponse> createTask(@PathVariable String username, @Valid @RequestBody TaskCreateRequest request) {
         LOGGER.info("Received request to create task: {} attached to the user {}", request.getName(), username);
         if (!userService.userIsPresent(username)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Task createdTask = taskMapper.mapToTask(request, username);
         LOGGER.info("Created task with id: {}", createdTask.getId());
-        return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+        return new ResponseEntity<>(new TaskCreateResponse(createdTask), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

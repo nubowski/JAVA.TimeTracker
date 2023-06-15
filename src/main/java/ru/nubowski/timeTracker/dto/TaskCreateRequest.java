@@ -6,6 +6,9 @@ public class TaskCreateRequest {
     @NotBlank(message = "Task name is required")
     private String name;
 
+    @NotBlank(message = "Description is required")
+    private String description;
+
     public String getName() {
         return name;
     }
@@ -21,7 +24,5 @@ public class TaskCreateRequest {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    @NotBlank(message = "Description is required")
-    private String description;
 }
+

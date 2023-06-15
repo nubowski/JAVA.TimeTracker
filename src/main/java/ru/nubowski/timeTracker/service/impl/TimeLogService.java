@@ -91,7 +91,7 @@ public class TimeLogService {
         return Duration.between(startTime, endTime);
     }
 
-    @Scheduled(cron = "0 59 23 * * ?")
+    @Scheduled(cron = "0 59 23 * * ?") // TODO: make a schedule or whatever package
     public void autoEndTasks() {
         LOGGER.info("Auto-ending ongoing tasks");
         List<TimeLog> ongoingTimeLog = timeLogRepository.findByEndTimeIsNullAndTaskStateEquals(TaskState.ONGOING); // PAUSE
