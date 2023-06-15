@@ -73,10 +73,12 @@ public class UserController {
 
     @DeleteMapping("/{username}")
     public ResponseEntity<Void> deleteUser(@PathVariable String username) {
-        LOGGER.info("Received request to delete user with username: {}", username);
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+
+        /*LOGGER.info("Received request to delete user with username: {}", username);
         userService.deleteUser(username);
         LOGGER.info("Deleted user with username: {}", username);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();*/
     }
 
     @DeleteMapping("/{username}/delete")
