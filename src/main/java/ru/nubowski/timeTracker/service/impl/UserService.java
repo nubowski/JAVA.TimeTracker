@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.UserRepository;
-import ru.nubowski.timeTracker.service.ProcessService;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

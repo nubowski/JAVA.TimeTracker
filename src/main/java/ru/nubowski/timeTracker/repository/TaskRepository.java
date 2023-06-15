@@ -2,7 +2,6 @@ package ru.nubowski.timeTracker.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.nubowski.timeTracker.model.Task;
-import ru.nubowski.timeTracker.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;

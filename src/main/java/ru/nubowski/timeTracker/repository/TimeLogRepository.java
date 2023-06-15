@@ -13,29 +13,25 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
-    Optional<TimeLog> findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc (Task task); // What The Hell ??? Is THAT naming (done by convention xDD)
-    List<TimeLog> findByEndTimeIsNull(); // DEPRECATED
+    Optional<TimeLog> findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc (Task task);
 
     List<TimeLog> findByEndTimeIsNullAndTaskStateEquals(TaskState taskState); // -> LIST
-    @Query("SELECT t FROM TimeLog t WHERE t.task.user = :user AND ((t.startTime < :end AND t.endTime > :start) OR (t.endTime is NULL AND t.startTime < :end))")
-    List<TimeLog> findTST (User user, LocalDateTime start, LocalDateTime end);
-
-
     Optional<TimeLog> findByTaskAndTaskState(Task task, TaskState taskState);
-
-    List<TimeLog> findByTaskUser(User user);
     List<TimeLog> findByTaskOrderByStartTimeAsc(Task task);
     List<TimeLog> findByStartTimeBefore(LocalDateTime cutoff);
-
     Optional<TimeLog> findFirstByTaskOrderByStartTimeDesc(Task task); // just in case of last log as is
-
     List<TimeLog> findByTask(Task task);
-
     List<TimeLog> findAllByTask(Task task);
 
-    List<TimeLog> findByTaskOrderByStartTime (Task task); // DEPRECATED
 
-    // method to fetch TimeLogs by user and data range TODO: too complex and unreadable. But MUCH faster and independent of traffic
+
+
+    @Query("SELECT t FROM TimeLog t WHERE t.task.user = :user AND ((t.startTime < :end AND t.endTime > :start) OR (t.endTime is NULL AND t.startTime < :end))")
+    List<TimeLog> findTST (User user, LocalDateTime start, LocalDateTime end); // DEPRECATED coz of getTotalWorkEffortInSeconds
+
+    // method to fetch TimeLogs by user and data range
+    // TODO: too complex and unreadable for newbies (like me). But MUCH faster and independent of traffic
+
     @Query(value = "SELECT SUM(EXTRACT(EPOCH FROM (" +
             "LEAST(COALESCE(t.end_time, CURRENT_TIMESTAMP), :end) - " +
             "GREATEST(t.start_time, :start)))) " +
@@ -46,6 +42,5 @@ public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
             "LEAST(COALESCE(t.end_time, CURRENT_TIMESTAMP), :end) - " +
             "GREATEST(t.start_time, :start)))) > 0", nativeQuery = true)
     Long getTotalWorkEffortInSeconds(@Param("user_id") Long id, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
-
 
 }

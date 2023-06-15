@@ -24,7 +24,6 @@ public class User {
     private Set<Task> tasks = new HashSet<>();
 
 
-
     @Override
     public String toString() {
         return "User { " +

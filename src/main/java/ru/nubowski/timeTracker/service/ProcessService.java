@@ -11,7 +11,6 @@ import ru.nubowski.timeTracker.repository.TaskRepository;
 import ru.nubowski.timeTracker.repository.UserRepository;
 import ru.nubowski.timeTracker.service.impl.TaskService;
 import ru.nubowski.timeTracker.service.impl.TimeLogService;
-import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,16 +19,14 @@ import java.util.List;
 public class ProcessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
     private final TaskService taskService;
-    private final UserService userService;
     private final TimeLogService timeLogService;
 
     private final UserRepository userRepository;
 
     private final TaskRepository taskRepository;
 
-    public ProcessService(TaskService taskService, UserService userService, TimeLogService timeLogService, UserRepository userRepository, TaskRepository taskRepository) {
+    public ProcessService(TaskService taskService, TimeLogService timeLogService, UserRepository userRepository, TaskRepository taskRepository) {
         this.taskService = taskService;
-        this.userService = userService;
         this.timeLogService = timeLogService;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;

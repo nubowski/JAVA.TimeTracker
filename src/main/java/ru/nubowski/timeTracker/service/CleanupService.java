@@ -8,21 +8,18 @@ import ru.nubowski.timeTracker.config.CleanupProperties;
 import ru.nubowski.timeTracker.exception.CleanupFailedException;
 import ru.nubowski.timeTracker.service.impl.TaskService;
 import ru.nubowski.timeTracker.service.impl.TimeLogService;
-import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.time.LocalDateTime;
 @Service
 public class CleanupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
     private final TaskService taskService;
-    private final UserService userService;
     private final TimeLogService timeLogService;
     private final ProcessService processService;
     private final CleanupProperties cleanupProperties;
 
-    public CleanupService(TaskService taskService, UserService userService, TimeLogService timeLogService, ProcessService processService, CleanupProperties cleanupProperties) {
+    public CleanupService(TaskService taskService, TimeLogService timeLogService, ProcessService processService, CleanupProperties cleanupProperties) {
         this.taskService = taskService;
-        this.userService = userService;
         this.timeLogService = timeLogService;
         this.processService = processService;
         this.cleanupProperties = cleanupProperties;
