@@ -3,17 +3,20 @@ package ru.nubowski.timeTracker.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.nubowski.timeTracker.dto.TaskCreateRequest;
 import ru.nubowski.timeTracker.exception.OngoingTaskNotFoundException;
 import ru.nubowski.timeTracker.exception.TaskNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TaskState;
 import ru.nubowski.timeTracker.model.TimeLog;
+import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.TaskRepository;
 import ru.nubowski.timeTracker.repository.TimeLogRepository;
 import ru.nubowski.timeTracker.util.ClockProvider;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -94,5 +97,19 @@ public class TaskService {
         timeLog.setEndTime(clockProvider.now());
         timeLog.setTaskState(TaskState.PAUSED);
         return timeLogRepository.save(timeLog);
+    }
+
+    public Task updateTask(String username, String taskName, TaskCreateRequest request) {
+        Task taskToUpdate = taskRepository.findByUserUsernameAndName(username, taskName).get(); // fixed doubling, and now .get without isPresent -_-
+        taskToUpdate.setName(request.getName());
+        taskToUpdate.setDescription(request.getDescription());
+        taskRepository.save(taskToUpdate);
+        LOGGER.info("Task with id {} is saved", taskToUpdate.getId());
+        return taskToUpdate;
+    }
+
+    public boolean taskIsPresent(String username, String taskName) {
+        Optional<Task> checkTask = taskRepository.findByUserUsernameAndName(username, taskName);
+        return checkTask.isPresent();
     }
 }

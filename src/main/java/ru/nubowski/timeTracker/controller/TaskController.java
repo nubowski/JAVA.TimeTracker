@@ -14,6 +14,7 @@ import ru.nubowski.timeTracker.service.impl.TaskService;
 import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/tasks")
@@ -45,6 +46,15 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
+        LOGGER.info("Received request to update task with id: {} with data: {}", id, task);
+        task.setId(id);
+        Task updatedTask = taskService.saveTask(task);
+        LOGGER.info("Updated task with id: {}", updatedTask.getId());
+        return ResponseEntity.ok(updatedTask);
+    }
+
     @PostMapping("/{username}")
     public ResponseEntity<TaskCreateResponse> createTask(@PathVariable String username, @Valid @RequestBody TaskCreateRequest request) {
         LOGGER.info("Received request to create task: {} attached to the user {}", request.getName(), username);
@@ -56,14 +66,19 @@ public class TaskController {
         return new ResponseEntity<>(new TaskCreateResponse(createdTask), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
-        LOGGER.info("Received request to update task with id: {} with data: {}", id, task);
-        task.setId(id);
-        Task updatedTask = taskService.saveTask(task);
-        LOGGER.info("Updated task with id: {}", updatedTask.getId());
-        return ResponseEntity.ok(updatedTask);
+    @PutMapping("/{username}/{taskName}")
+    public ResponseEntity<TaskCreateResponse> updateTask(@PathVariable String username, @PathVariable String taskName, @RequestBody TaskCreateRequest request) {
+        LOGGER.info("Received request to update task with username: {} and taskName: {}", username, taskName);
+        if (!taskService.taskIsPresent(username, taskName)) {
+            LOGGER.error("Task not found with username: {} and taskName: {}", username, taskName);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Task updatedTask = taskService.updateTask(username, taskName, request);
+            LOGGER.info("Updated task with id: {}", updatedTask.getId());
+            return new ResponseEntity<>(new TaskCreateResponse(updatedTask), HttpStatus.CREATED);
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
