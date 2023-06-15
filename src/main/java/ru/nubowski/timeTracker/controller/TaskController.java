@@ -1,12 +1,16 @@
 package ru.nubowski.timeTracker.controller;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.nubowski.timeTracker.dto.TaskCreateRequest;
+import ru.nubowski.timeTracker.mapper.TaskMapper;
 import ru.nubowski.timeTracker.model.Task;
-import ru.nubowski.timeTracker.service.TaskService;
+import ru.nubowski.timeTracker.service.impl.TaskService;
+import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.util.List;
 
@@ -14,10 +18,14 @@ import java.util.List;
 @RequestMapping("/tasks")
 public class TaskController {
     private static final  Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
+    private final TaskMapper taskMapper;
     private final TaskService taskService;
+    private final UserService userService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskMapper taskMapper, TaskService taskService, UserService userService) {
+        this.taskMapper = taskMapper;
         this.taskService = taskService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -36,10 +44,13 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
-    @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        LOGGER.info("Received request to create task: {}", task);
-        Task createdTask = taskService.saveTask(task);
+    @PostMapping("/{username}")
+    public ResponseEntity<Task> createTask(@PathVariable String username, @Valid @RequestBody TaskCreateRequest request) {
+        LOGGER.info("Received request to create task: {} attached to the user {}", request.getName(), username);
+        if (!userService.userIsPresent(username)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Task createdTask = taskMapper.mapToTask(request, username);
         LOGGER.info("Created task with id: {}", createdTask.getId());
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }

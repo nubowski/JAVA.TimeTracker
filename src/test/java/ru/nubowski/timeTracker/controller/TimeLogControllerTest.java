@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.nubowski.timeTracker.model.TaskState;
@@ -18,16 +17,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
-import ru.nubowski.timeTracker.repository.TimeLogRepository;
-import ru.nubowski.timeTracker.service.TaskService;
-import ru.nubowski.timeTracker.service.TimeLogService;
-import ru.nubowski.timeTracker.service.UserService;
+import ru.nubowski.timeTracker.service.impl.TaskService;
+import ru.nubowski.timeTracker.service.impl.TimeLogService;
+import ru.nubowski.timeTracker.service.impl.UserService;
 import ru.nubowski.timeTracker.util.CustomClockProvider;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;

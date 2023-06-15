@@ -20,7 +20,7 @@ public class Task {
 
     @Column
     private LocalDateTime createdAt;
-    @ManyToOne(fetch = FetchType.LAZY) // TODO read about one-to-many and vice versa for DB
+    @ManyToOne(fetch = FetchType.LAZY) // TODO read about one-to-many and vice versa for DB with dif fetch types
     @JoinColumn(name = "user_id", nullable = false) // TODO check withing the project (was OK)
     private User user;
 

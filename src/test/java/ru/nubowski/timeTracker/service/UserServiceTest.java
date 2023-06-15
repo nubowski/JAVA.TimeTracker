@@ -9,6 +9,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.nubowski.timeTracker.exception.UserNotFoundException;
 import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.UserRepository;
+import ru.nubowski.timeTracker.service.impl.TaskService;
+import ru.nubowski.timeTracker.service.impl.TimeLogService;
+import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -30,6 +33,8 @@ public class UserServiceTest {
     private TaskService taskService;
     @MockBean
     private TimeLogService timeLogService;
+    @Autowired
+    private ProcessService processService;
 
     @Autowired
     private UserService userService;
@@ -117,7 +122,7 @@ public class UserServiceTest {
     void testDeleteUserAndTasksUserNotFound() {
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class, () -> {
-            userService.deleteTimeLogsAndTasks("test_username");
+            processService.deleteTimeLogsAndTasks("test_username");
         });
     }
 
@@ -131,7 +136,7 @@ public class UserServiceTest {
         when(userRepository.findByCreatedAtBefore(any(LocalDateTime.class))).thenReturn(Arrays.asList(oldUser1, oldUser2));
         when(userRepository.findByUsername("old1")).thenReturn(Optional.of(oldUser1));
         when(userRepository.findByUsername("old2")).thenReturn(Optional.of(oldUser2));
-        userService.deleteOldUsers(cutoff);
+        processService.deleteOldUsers(cutoff);
         verify(userRepository, times(1)).deleteAll(Arrays.asList(oldUser1, oldUser2));
     }
 }

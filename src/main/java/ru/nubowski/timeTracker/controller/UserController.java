@@ -8,20 +8,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nubowski.timeTracker.dto.UserCreateRequest;
 import ru.nubowski.timeTracker.dto.UserUpdateRequest;
+import ru.nubowski.timeTracker.mapper.UserMapper;
 import ru.nubowski.timeTracker.model.User;
-import ru.nubowski.timeTracker.service.UserService;
+import ru.nubowski.timeTracker.service.ProcessService;
+import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
+    private final UserMapper userMapper;
+    private final ProcessService processService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserMapper userMapper, ProcessService processService) {
         this.userService = userService;
+        this.userMapper = userMapper;
+        this.processService = processService;
     }
 
     @GetMapping
@@ -43,29 +48,24 @@ public class UserController {
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody UserCreateRequest request) {
         LOGGER.info("Received request to create user: {}", request.getUsername());
-
         // check if already exists
-        Optional<User> existingUser = userService.getUserByUsername(request.getUsername());
-        if (existingUser.isPresent()) {
+        if (userService.userIsPresent(request.getUsername())) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         // if user doesn't exist
-        User userToCreate = userService.mapToUser(request);
+        User userToCreate = userMapper.mapToUser(request);
         User createdUser = userService.saveUser(userToCreate);
         LOGGER.info("Created user: {}", createdUser.getUsername());
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{username}") // TODO: all is good until username is unique entity, if not - auth/auth/another approach
+    @PutMapping("/{username}") // TODO: all is good until username is unique entity, if not - auth/auth/regis approach
     public ResponseEntity<User> updateUser(@PathVariable String username, @Valid @RequestBody UserUpdateRequest request) {
         LOGGER.info("Received request to update user with username: {} with data {}", username, request);
-
-        Optional<User> existingUser = userService.getUserByUsername(username);
-        if (existingUser.isEmpty()) {
+        if (!userService.userIsPresent(username)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
-        User userToUpdate = userService.mapToUpgradeUser(request, username);
+        User userToUpdate = userMapper.mapToUpgradeUser(request, username);
         User updatedUser = userService.saveUser(userToUpdate);
         LOGGER.info("Updated user with username: {}", updatedUser.getUsername());
         return ResponseEntity.ok(updatedUser);
@@ -84,7 +84,7 @@ public class UserController {
     @DeleteMapping("/{username}/delete")
     public ResponseEntity<Void> deleteUserAndTasks(@PathVariable String username) {
         LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
-        userService.deleteTimeLogsAndTasks(username);
+        processService.deleteTimeLogsAndTasks(username);
         LOGGER.info("Deleted user with username: {} and all their tasks", username);
         userService.deleteUser(username); // doubt about double controller reset/delete, should be 1 with keys
         return ResponseEntity.noContent().build();
@@ -93,7 +93,7 @@ public class UserController {
     @DeleteMapping("/{username}/reset")
     public ResponseEntity<User> resetTimeLogsAndTasks(@PathVariable String username) {
         LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
-        userService.deleteTimeLogsAndTasks(username);
+        processService.deleteTimeLogsAndTasks(username);
         LOGGER.info("Deleted user with username: {} and all their tasks", username);
         User user = userService.getUser(username);
         return ResponseEntity.ok(user);

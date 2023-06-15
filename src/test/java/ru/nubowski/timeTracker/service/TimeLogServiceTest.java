@@ -1,6 +1,5 @@
 package ru.nubowski.timeTracker.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import ru.nubowski.timeTracker.exception.TimeLogNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.repository.TimeLogRepository;
+import ru.nubowski.timeTracker.service.impl.TimeLogService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -35,6 +35,8 @@ public class TimeLogServiceTest {
         TimeLog timeLog = new TimeLog();
         timeLog.setStartTime(LocalDateTime.now());
         Task task = new Task();
+        task.setName("task");
+        task.setDescription("description");
         timeLog.setTask(task);
 
         when(timeLogRepository.save(any(TimeLog.class))).thenReturn(timeLog); // mockito

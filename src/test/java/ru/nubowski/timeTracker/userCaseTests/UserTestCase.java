@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.nubowski.timeTracker.controller.TimeLogControllerTest;
@@ -22,16 +21,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
-import ru.nubowski.timeTracker.repository.TimeLogRepository;
-import ru.nubowski.timeTracker.service.TaskService;
-import ru.nubowski.timeTracker.service.TimeLogService;
-import ru.nubowski.timeTracker.service.UserService;
+import ru.nubowski.timeTracker.service.impl.TaskService;
+import ru.nubowski.timeTracker.service.impl.TimeLogService;
+import ru.nubowski.timeTracker.service.impl.UserService;
 import ru.nubowski.timeTracker.util.CustomClockProvider;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -145,12 +141,15 @@ public class UserTestCase {
         task.setName("testTask1");
         task.setDescription("Some description to be sure it is working OK");
         task.setUser(savedUser);
-        task = taskService.saveTask(task);
+        taskService.saveTask(task);
 
-        mockMvc.perform(post("/tasks")
+        mockMvc.perform(post("/tasks/" + user.getUsername())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andReturn();
+
+
 
         // time before starting the task
         LocalDateTime expectedStart = clockProvider.LocalTime();

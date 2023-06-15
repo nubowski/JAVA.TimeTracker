@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.model.User;
-import ru.nubowski.timeTracker.service.TaskService;
-import ru.nubowski.timeTracker.service.TimeLogService;
-import ru.nubowski.timeTracker.service.UserService;
+import ru.nubowski.timeTracker.service.impl.TaskService;
+import ru.nubowski.timeTracker.service.impl.TimeLogService;
+import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -41,7 +41,7 @@ public class TimeLogController {
         LOGGER.info("Received request to start task with id {}", taskId);
         try {
             Task task = taskService.getTask(taskId);
-            TimeLog timeLog = timeLogService.startTask(task);
+            TimeLog timeLog = taskService.startTask(task);
             LOGGER.info("Task with id {} has been started", taskId);  // dont think its necessary coz of custom ex, but just in case
             return new ResponseEntity<>(timeLog, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class TimeLogController {
     public ResponseEntity<TimeLog> stopTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to stop task with id {}", taskId);
         Task task = taskService.getTask(taskId);
-        TimeLog timeLog = timeLogService.stopTask(task);
+        TimeLog timeLog = taskService.stopTask(task);
         LOGGER.info("Task with id {} has been stopped", taskId);
         return ResponseEntity.ok(timeLog);
     }
@@ -195,7 +195,7 @@ public class TimeLogController {
     public ResponseEntity<TimeLog> pauseTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to pause task with id {}", taskId);
         Task task = taskService.getTask(taskId);
-        TimeLog timeLog = timeLogService.pauseTask(task);
+        TimeLog timeLog = taskService.pauseTask(task);
         LOGGER.info("Task with id {} has been paused", taskId);
         return ResponseEntity.ok(timeLog);
     }
@@ -204,7 +204,7 @@ public class TimeLogController {
     public ResponseEntity<TimeLog> resumeTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to resume task with id {}", taskId);
         Task task = taskService.getTask(taskId);
-        TimeLog timeLog = timeLogService.resumeTask(task);
+        TimeLog timeLog = taskService.resumeTask(task);
         LOGGER.info("Task with id {} has been resumed", taskId);
         return ResponseEntity.ok(timeLog);
     }

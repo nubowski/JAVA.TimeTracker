@@ -9,6 +9,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.nubowski.timeTracker.config.CleanupProperties;
 import ru.nubowski.timeTracker.exception.CleanupFailedException;
+import ru.nubowski.timeTracker.service.impl.TaskService;
+import ru.nubowski.timeTracker.service.impl.TimeLogService;
+import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +32,8 @@ public class CleanupServiceTest {
     private UserService userService;
     @MockBean
     private TimeLogService timeLogService;
+    @MockBean
+    private ProcessService processService;
     @Autowired
     private CleanupProperties cleanupProperties;
 
@@ -42,28 +47,28 @@ public class CleanupServiceTest {
         cleanupService.cleanup();
 
         verify(taskService, times(1)).deleteOldTasks(any(LocalDateTime.class));
-        verify(userService, times(1)).deleteOldUsers(any(LocalDateTime.class));
+        verify(processService, times(1)).deleteOldUsers(any(LocalDateTime.class));
         verify(timeLogService, times(1)).deleteOldTimeLogs(any(LocalDateTime.class));
     }
 
     @Test
     void testCleanupFailedException() {
         doThrow(new CleanupFailedException("deleteOldTasks")).when(taskService).deleteOldTasks(any(LocalDateTime.class));
-        doThrow(new CleanupFailedException("deleteOldUsers")).when(userService).deleteOldUsers(any(LocalDateTime.class));
+        doThrow(new CleanupFailedException("deleteOldUsers")).when(processService).deleteOldUsers(any(LocalDateTime.class));
         doThrow(new CleanupFailedException("deleteOldTimeLogs")).when(timeLogService).deleteOldTimeLogs(any(LocalDateTime.class));
 
         assertThrows(CleanupFailedException.class, () -> cleanupService.cleanup());
 
         verify(taskService, times(1)).deleteOldTasks(any(LocalDateTime.class));
         verify(timeLogService, times(0)).deleteOldTimeLogs(any(LocalDateTime.class));
-        verify(userService, times(0)).deleteOldUsers(any(LocalDateTime.class));
+        verify(processService, times(0)).deleteOldUsers(any(LocalDateTime.class));
     }
 
     @Test
     void testGeneralException() {
         // if we passed all three internal calls..
         doNothing().when(taskService).deleteOldTasks(any(LocalDateTime.class));
-        doNothing().when(userService).deleteOldUsers(any(LocalDateTime.class));
+        doNothing().when(processService).deleteOldUsers(any(LocalDateTime.class));
         doNothing().when(timeLogService).deleteOldTimeLogs(any(LocalDateTime.class));
 
         doThrow(new CleanupFailedException()).when(taskService).deleteOldTasks(any(LocalDateTime.class));
@@ -71,7 +76,7 @@ public class CleanupServiceTest {
         assertThrows(CleanupFailedException.class, () -> cleanupService.cleanup());
 
         verify(taskService, times(1)).deleteOldTasks(any(LocalDateTime.class));
-        verify(userService, times(0)).deleteOldUsers(any(LocalDateTime.class));
+        verify(processService, times(0)).deleteOldUsers(any(LocalDateTime.class));
         verify(timeLogService, times(0)).deleteOldTimeLogs(any(LocalDateTime.class));
     }
 }
