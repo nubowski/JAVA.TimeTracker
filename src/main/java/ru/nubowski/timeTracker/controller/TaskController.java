@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.nubowski.timeTracker.dto.AllTasksGetResponse;
 import ru.nubowski.timeTracker.dto.TaskCreateRequest;
 import ru.nubowski.timeTracker.dto.TaskCreateResponse;
 import ru.nubowski.timeTracker.mapper.TaskMapper;
@@ -15,6 +16,7 @@ import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tasks")
@@ -31,11 +33,14 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks() {
+    public ResponseEntity<List<AllTasksGetResponse>> getAllTasks() {
         LOGGER.info("Received request to get all tasks");
         List<Task> tasks = taskService.getAllTasks();
-        LOGGER.info("Responding with {} tasks", tasks.size());
-        return ResponseEntity.ok(tasks);
+        List<AllTasksGetResponse> responses = tasks.stream()
+                .map(taskMapper::taskToAllTasksGetResponse)
+                .collect(Collectors.toList());
+        LOGGER.info("Responding with {} tasks", responses.size());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")

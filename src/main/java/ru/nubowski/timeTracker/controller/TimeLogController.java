@@ -152,7 +152,7 @@ public class TimeLogController {
                     .collect(Collectors.toList());
         } else {  // "interval"
             formattedTimeLogs = timeLogs.stream()
-                    .map(log -> String.format("%s - %s : %s",
+                    .map(log -> String.format("%s - %s | %s",
                             log.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                             log.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                             log.getTask().getName()))

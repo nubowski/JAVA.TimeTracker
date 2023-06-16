@@ -3,6 +3,7 @@ package ru.nubowski.timeTracker.mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.nubowski.timeTracker.dto.AllTasksGetResponse;
 import ru.nubowski.timeTracker.dto.TaskCreateRequest;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.service.impl.UserService;
@@ -25,5 +26,15 @@ public class TaskMapper {
         task.setDescription(request.getDescription());
         // set other..
         return task;
+    }
+    public AllTasksGetResponse taskToAllTasksGetResponse(Task task) {
+
+        AllTasksGetResponse response = new AllTasksGetResponse(task);
+        response.setId(task.getId());
+        response.setName(task.getName());
+        response.setDescription(task.getDescription());
+        response.setCreatedAt(task.getCreatedAt());
+        response.setUsername(task.getUser().getUsername());
+        return response;
     }
 }
