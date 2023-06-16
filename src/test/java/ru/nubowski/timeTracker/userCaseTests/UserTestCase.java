@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
-import ru.nubowski.timeTracker.controller.TimeLogControllerTest;
+import ru.nubowski.timeTracker.controller.TaskControllerTest;
 import ru.nubowski.timeTracker.dto.UserCreateRequest;
 import ru.nubowski.timeTracker.dto.UserUpdateRequest;
 import ru.nubowski.timeTracker.model.User;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class UserTestCase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TimeLogControllerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskControllerTest.class);
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -155,7 +155,7 @@ public class UserTestCase {
         LocalDateTime expectedStart = clockProvider.LocalTime();
         clockProvider.resetTime();
 
-        mockMvc.perform(post("/time_logs/start/" + task.getId())
+        mockMvc.perform(post("/tasks/start/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
@@ -165,11 +165,11 @@ public class UserTestCase {
         LocalDateTime expectedEnd = clockProvider.LocalTime();
         clockProvider.resetTime();
 
-        mockMvc.perform(post("/time_logs/stop/" + task.getId())
+        mockMvc.perform(post("/tasks/stop/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        MvcResult result = mockMvc.perform(get("/time_logs/task/" + task.getId())
+        MvcResult result = mockMvc.perform(get("/tasks/task/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -245,29 +245,29 @@ public class UserTestCase {
 
         // task1
         clockProvider.minusTime(Duration.ofHours(10));
-        mockMvc.perform(post("/time_logs/start/" + task1.getId())
+        mockMvc.perform(post("/tasks/start/" + task1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.plusTime(Duration.ofMinutes(10));
-        mockMvc.perform(post("/time_logs/stop/" + task1.getId())
+        mockMvc.perform(post("/tasks/stop/" + task1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
 
         // task2
         clockProvider.minusTime(Duration.ofDays(3));
-        mockMvc.perform(post("/time_logs/start/" + task2.getId())
+        mockMvc.perform(post("/tasks/start/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.plusTime(Duration.ofMinutes(49));
-        mockMvc.perform(post("/time_logs/stop/" + task2.getId())
+        mockMvc.perform(post("/tasks/stop/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
 
         // task3
         clockProvider.minusTime(Duration.ofHours(1));
-        mockMvc.perform(post("/time_logs/start/" + task3.getId())
+        mockMvc.perform(post("/tasks/start/" + task3.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.resetTime();
@@ -329,22 +329,22 @@ public class UserTestCase {
 
         // task1
         clockProvider.minusTime(Duration.ofHours(57));
-        mockMvc.perform(post("/time_logs/start/" + task1.getId())
+        mockMvc.perform(post("/tasks/start/" + task1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.plusTime(Duration.ofMinutes(257));
-        mockMvc.perform(post("/time_logs/stop/" + task1.getId())
+        mockMvc.perform(post("/tasks/stop/" + task1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
 
         // task2
         clockProvider.minusTime(Duration.ofDays(3));
-        mockMvc.perform(post("/time_logs/start/" + task2.getId())
+        mockMvc.perform(post("/tasks/start/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.plusTime(Duration.ofMinutes(49));
-        mockMvc.perform(post("/time_logs/stop/" + task2.getId())
+        mockMvc.perform(post("/tasks/stop/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
@@ -434,40 +434,40 @@ public class UserTestCase {
 
         // task1
         clockProvider.minusTime(Duration.ofHours(26));
-        mockMvc.perform(post("/time_logs/start/" + task1.getId())
+        mockMvc.perform(post("/tasks/start/" + task1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.plusTime(Duration.ofMinutes(127));
-        mockMvc.perform(post("/time_logs/stop/" + task1.getId())
+        mockMvc.perform(post("/tasks/stop/" + task1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
 
         // task2
         clockProvider.minusTime(Duration.ofDays(3));
-        mockMvc.perform(post("/time_logs/start/" + task2.getId())
+        mockMvc.perform(post("/tasks/start/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.plusTime(Duration.ofMinutes(49));
-        mockMvc.perform(post("/time_logs/stop/" + task2.getId())
+        mockMvc.perform(post("/tasks/stop/" + task2.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
 
         // task3
         clockProvider.minusTime(Duration.ofDays(5));
-        mockMvc.perform(post("/time_logs/start/" + task3.getId())
+        mockMvc.perform(post("/tasks/start/" + task3.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.plusTime(Duration.ofMinutes(264));
-        mockMvc.perform(post("/time_logs/stop/" + task3.getId())
+        mockMvc.perform(post("/tasks/stop/" + task3.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
 
         // task4
         clockProvider.minusTime(Duration.ofHours(25));
-        mockMvc.perform(post("/time_logs/start/" + task4.getId())
+        mockMvc.perform(post("/tasks/start/" + task4.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         clockProvider.resetTime();
@@ -508,14 +508,14 @@ public class UserTestCase {
         task = taskService.saveTask(task);
 
 
-        mockMvc.perform(post("/time_logs/start/" + task.getId())
+        mockMvc.perform(post("/tasks/start/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
         Thread.sleep(500);
         clockProvider.resetTime(); // sync CustomTimeClockProvider
 
-        mockMvc.perform(post("/time_logs/stop/" + task.getId())
+        mockMvc.perform(post("/tasks/stop/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();
@@ -562,14 +562,14 @@ public class UserTestCase {
         task = taskService.saveTask(task);
 
 
-        mockMvc.perform(post("/time_logs/start/" + task.getId())
+        mockMvc.perform(post("/tasks/start/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
         Thread.sleep(500);
         clockProvider.resetTime(); // sync CustomTimeClockProvider
 
-        mockMvc.perform(post("/time_logs/stop/" + task.getId())
+        mockMvc.perform(post("/tasks/stop/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         clockProvider.resetTime();

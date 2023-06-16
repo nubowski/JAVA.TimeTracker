@@ -115,6 +115,24 @@ public class TaskController {
         return ResponseEntity.ok(timeLog);
     }
 
+    @PostMapping("/pause/{taskId}")
+    public ResponseEntity<TimeLog> pauseTask(@PathVariable Long taskId) {
+        LOGGER.info("Received request to pause task with id {}", taskId);
+        Task task = taskService.getTask(taskId);
+        TimeLog timeLog = taskService.pauseTask(task);
+        LOGGER.info("Task with id {} has been paused", taskId);
+        return ResponseEntity.ok(timeLog);
+    }
+
+    @PostMapping("/resume/{taskId}")
+    public ResponseEntity<TimeLog> resumeTask(@PathVariable Long taskId) {
+        LOGGER.info("Received request to resume task with id {}", taskId);
+        Task task = taskService.getTask(taskId);
+        TimeLog timeLog = taskService.resumeTask(task);
+        LOGGER.info("Task with id {} has been resumed", taskId);
+        return ResponseEntity.ok(timeLog);
+    }
+
     /*@PostMapping("/start/{taskName}")
     public ResponseEntity<TimeLog> startTask(@PathVariable String username ,String taskName) {
         LOGGER.info("Received request to start task {}", taskName);

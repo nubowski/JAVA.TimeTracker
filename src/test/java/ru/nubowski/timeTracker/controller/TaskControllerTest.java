@@ -33,8 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class TimeLogControllerTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TimeLogControllerTest.class);
+public class TaskControllerTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskControllerTest.class);
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -67,7 +67,7 @@ public class TimeLogControllerTest {
         LOGGER.info("About to test task start with task {}", createdTask.getId());
 
         // request to start
-        mockMvc.perform(post("/time_logs/start/" + createdTask.getId())
+        mockMvc.perform(post("/tasks/start/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isCreated());
 
@@ -78,7 +78,7 @@ public class TimeLogControllerTest {
         LOGGER.info("Duration elapsed for the task: {}", durationElapsed.toMillis());
 
         // request to stop
-        mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
+        mockMvc.perform(post("/tasks/stop/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());
 
@@ -107,7 +107,7 @@ public class TimeLogControllerTest {
         LOGGER.info("About to test task start with task {}", createdTask.getId());
 
         // request to start
-        mockMvc.perform(post("/time_logs/start/" + createdTask.getId())
+        mockMvc.perform(post("/tasks/start/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         List<TimeLog> timeLogsAfterStart = timeLogService.getAllTimeLogsForTask(createdTask);
@@ -115,7 +115,7 @@ public class TimeLogControllerTest {
         assertEquals(TaskState.ONGOING, timeLogsAfterStart.get(0).getTaskState(), "Task state should be ONGOING after starting the task");
 
         // request to pause
-        mockMvc.perform(post("/time_logs/pause/" + createdTask.getId())
+        mockMvc.perform(post("/tasks/pause/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         List<TimeLog> timeLogsAfterPause = timeLogService.getAllTimeLogsForTask(createdTask);
@@ -123,7 +123,7 @@ public class TimeLogControllerTest {
         assertEquals(TaskState.PAUSED, timeLogsAfterPause.get(0).getTaskState(), "Task state should be PAUSED after pausing the task");
 
         // request to resume
-        mockMvc.perform(post("/time_logs/resume/" + createdTask.getId())
+        mockMvc.perform(post("/tasks/resume/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         List<TimeLog> timeLogsAfterResume = timeLogService.getAllTimeLogsForTask(createdTask);
@@ -132,7 +132,7 @@ public class TimeLogControllerTest {
         assertEquals(TaskState.USER_STOPPED, timeLogsAfterResume.get(1).getTaskState(), "Task 2 state should be ONGOING after resuming the task");
 
         // request to stop
-        mockMvc.perform(post("/time_logs/stop/" + createdTask.getId())
+        mockMvc.perform(post("/tasks/stop/" + createdTask.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         List<TimeLog> timeLogsAfterStop = timeLogService.getAllTimeLogsForTask(createdTask);
@@ -181,29 +181,29 @@ public class TimeLogControllerTest {
 
             // task1
             clockProvider.minusTime(Duration.ofHours(10));
-            mockMvc.perform(post("/time_logs/start/" + task1.getId())
+            mockMvc.perform(post("/tasks/start/" + task1.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isCreated());
             clockProvider.plusTime(Duration.ofMinutes(10));
-            mockMvc.perform(post("/time_logs/stop/" + task1.getId())
+            mockMvc.perform(post("/tasks/stop/" + task1.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
             clockProvider.resetTime();
 
             // task2
             clockProvider.minusTime(Duration.ofDays(3));
-            mockMvc.perform(post("/time_logs/start/" + task2.getId())
+            mockMvc.perform(post("/tasks/start/" + task2.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isCreated());
             clockProvider.plusTime(Duration.ofMinutes(49));
-            mockMvc.perform(post("/time_logs/stop/" + task2.getId())
+            mockMvc.perform(post("/tasks/stop/" + task2.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
             clockProvider.resetTime();
 
             // task3
             clockProvider.minusTime(Duration.ofHours(1));
-            mockMvc.perform(post("/time_logs/start/" + task3.getId())
+            mockMvc.perform(post("/tasks/start/" + task3.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isCreated());
             clockProvider.resetTime();
