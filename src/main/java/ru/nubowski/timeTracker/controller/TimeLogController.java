@@ -42,7 +42,7 @@ public class TimeLogController {
         try {
             Task task = taskService.getTask(taskId);
             TimeLog timeLog = taskService.startTask(task);
-            LOGGER.info("Task with id {} has been started", taskId);  // dont think its necessary coz of custom ex, but just in case
+            LOGGER.info("Task with id {} has been started", taskId);  // don't think its necessary coz of custom ex, but just in case
             return new ResponseEntity<>(timeLog, HttpStatus.CREATED);
         } catch (Exception e) {
             LOGGER.error("Error occurred while starting task with id {}", taskId, e);
@@ -100,7 +100,7 @@ public class TimeLogController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/user/{username}/date_range")
+    @GetMapping("/user/{username}/date_range") // TODO clean this up and make it lean. Kick all the logic out
     public ResponseEntity<List<String>> getTimeLogsByUserAndDateRange(
             @PathVariable String username,
             @RequestParam("start")

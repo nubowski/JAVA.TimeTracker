@@ -9,7 +9,6 @@ import ru.nubowski.timeTracker.exception.TaskNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TaskState;
 import ru.nubowski.timeTracker.model.TimeLog;
-import ru.nubowski.timeTracker.model.User;
 import ru.nubowski.timeTracker.repository.TaskRepository;
 import ru.nubowski.timeTracker.repository.TimeLogRepository;
 import ru.nubowski.timeTracker.util.ClockProvider;

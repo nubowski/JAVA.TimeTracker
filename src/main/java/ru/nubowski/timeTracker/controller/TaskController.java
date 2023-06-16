@@ -15,7 +15,6 @@ import ru.nubowski.timeTracker.service.impl.TaskService;
 import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -83,8 +82,6 @@ public class TaskController {
             return new ResponseEntity<>(new TaskCreateResponse(updatedTask), HttpStatus.CREATED);
     }
 
-
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         LOGGER.info("Received request to delete task with id: {}", id);
@@ -92,4 +89,27 @@ public class TaskController {
         LOGGER.info("Deleted task with id: {}", id);
         return ResponseEntity.noContent().build();
     }
+
+    /*@PostMapping("/start/{taskName}")
+    public ResponseEntity<TimeLog> startTask(@PathVariable String username ,String taskName) {
+        LOGGER.info("Received request to start task {}", taskName);
+        try {
+            Task task = taskService.getTaskByName(username, taskName);
+            TimeLog timeLog = taskService.startTask(task);
+            LOGGER.info("Task {} has been started", taskName);  // don't think its necessary coz of custom ex, but just in case
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while starting task with id {}", taskName, e);
+            throw e;
+        }
+    }
+
+    @PostMapping("/stop/{taskName}")
+    public ResponseEntity<?> stopTask(@PathVariable String taskName) {
+        LOGGER.info("Received request to stop task {}", taskName);
+        Task task = taskService.getTaskByName(taskName);
+        TimeLog timeLog = taskService.stopTask(task);
+        LOGGER.info("Task {} has been stopped", taskName);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }*/
 }
