@@ -36,29 +36,6 @@ public class TimeLogController {
         this.userService = userService;
     }
 
-    @PostMapping("/start/{taskId}")
-    public ResponseEntity<TimeLog> startTask(@PathVariable Long taskId) {
-        LOGGER.info("Received request to start task with id {}", taskId);
-        try {
-            Task task = taskService.getTask(taskId);
-            TimeLog timeLog = taskService.startTask(task);
-            LOGGER.info("Task with id {} has been started", taskId);  // don't think its necessary coz of custom ex, but just in case
-            return new ResponseEntity<>(timeLog, HttpStatus.CREATED);
-        } catch (Exception e) {
-            LOGGER.error("Error occurred while starting task with id {}", taskId, e);
-            throw e;
-        }
-    }
-
-    @PostMapping("/stop/{taskId}")
-    public ResponseEntity<TimeLog> stopTask(@PathVariable Long taskId) {
-        LOGGER.info("Received request to stop task with id {}", taskId);
-        Task task = taskService.getTask(taskId);
-        TimeLog timeLog = taskService.stopTask(task);
-        LOGGER.info("Task with id {} has been stopped", taskId);
-        return ResponseEntity.ok(timeLog);
-    }
-
     @GetMapping
     public ResponseEntity<List<TimeLog>> getAllTimeLogs() {
         LOGGER.info("Received request to get all time logs");

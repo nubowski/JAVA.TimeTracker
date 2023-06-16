@@ -4,14 +4,14 @@ import ru.nubowski.timeTracker.model.Task;
 
 import java.time.LocalDateTime;
 
-public class AllTasksGetResponse {
+public class TaskToResponse {
     private Long id;
     private String name;
     private String description;
     private LocalDateTime createdAt;
     private String username;
 
-    public AllTasksGetResponse(Task task) {
+    public TaskToResponse(Task task) {
         this.id = task.getId();
         this.name = task.getName();
         this.description = task.getDescription();
