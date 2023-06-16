@@ -169,7 +169,7 @@ public class UserTestCase {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        MvcResult result = mockMvc.perform(get("/tasks/task/" + task.getId())
+        MvcResult result = mockMvc.perform(get("/time_logs/task/" + task.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
