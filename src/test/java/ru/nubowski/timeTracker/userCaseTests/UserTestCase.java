@@ -368,11 +368,11 @@ public class UserTestCase {
         LOGGER.info("Returned work intervals: {}", returnedWorkIntervals);
 
         // Create expected list of work intervals
-        String expectedInterval1 = String.format("%s - %s : %s",
+        String expectedInterval1 = String.format("%s - %s | %s",
                 LocalDateTime.now().minusHours(57).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 LocalDateTime.now().minusHours(57).plusMinutes(257).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 task1.getName());
-        String expectedInterval2 = String.format("%s - %s : %s",
+        String expectedInterval2 = String.format("%s - %s | %s",
                 LocalDateTime.now().minusDays(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 LocalDateTime.now().minusDays(3).plusMinutes(49).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 task2.getName());
