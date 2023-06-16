@@ -1,4 +1,5 @@
 package ru.nubowski.timeTracker.model;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class User {
     @Column
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @JsonManagedReference
     private Set<Task> tasks = new HashSet<>();
 
 

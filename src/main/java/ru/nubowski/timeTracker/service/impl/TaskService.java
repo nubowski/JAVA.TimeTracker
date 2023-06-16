@@ -44,6 +44,7 @@ public class TaskService {
 
     public Task saveTask(Task task) {
         LOGGER.info("Saving task with id: {}", task.getId());
+        task.setCreatedAt(LocalDateTime.now());
         return taskRepository.save(task);
     }
 
