@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  app:
+    image: your-app-name
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 8080:8080
