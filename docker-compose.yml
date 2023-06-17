@@ -15,7 +15,7 @@ services:
     ports:
       - "5433:5432"
   app:
-    image: time-tracker-ins
+    image: nubowski/time-tracker-ins:latest
     depends_on:
       db:
         condition: service_healthy
