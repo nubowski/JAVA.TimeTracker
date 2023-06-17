@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: time_tracker
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d time_tracker" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "5433:5432"
+  app:
+    image: time-tracker-ins
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: time_tracker
+      DB_USER: admin
+      DB_PASS: password

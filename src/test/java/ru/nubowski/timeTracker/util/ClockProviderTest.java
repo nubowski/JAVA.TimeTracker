@@ -6,13 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import ru.nubowski.timeTracker.controller.TimeLogControllerTest;
+import ru.nubowski.timeTracker.controller.TaskControllerTest;
 
 import java.time.LocalDateTime;
 @SpringBootTest
 @ActiveProfiles("test")
 public class ClockProviderTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TimeLogControllerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskControllerTest.class);
     @Autowired
     private CustomClockProvider clockProvider;
 
