@@ -664,55 +664,15 @@ This endpoint returns a list of all time logs for the task associated with the p
 [
   {
     "id": 0,
-    "startTime": "2023-06-15T23:55:17.371Z",
-    "endTime": "2023-06-15T23:55:17.371Z",
-    "endedByUser": true,
-    "taskState": "ONGOING",
-    "task": {
-      "id": 0,
-      "name": "string",
-      "description": "string",
-      "createdAt": "2023-06-15T23:55:17.371Z",
-      "user": {
-        "id": 0,
-        "username": "string",
-        "displayName": "string",
-        "email": "string",
-        "createdAt": "2023-06-15T23:55:17.371Z",
-        "tasks": [
-          "string"
-        ]
-      },
-      "timeLogs": [
-        "string"
-      ]
-    }
+    "startTime": "2023-06-18T19:17:23.404Z",
+    "endTime": "2023-06-18T19:17:23.404Z",
+    "endedByUser": true
   },
   {
-    "id": 1,
-    "startTime": "2023-06-15T23:55:17.371Z",
-    "endTime": "2023-06-15T23:55:17.371Z",
-    "endedByUser": true,
-    "taskState": "ONGOING",
-    "task": {
-      "id": 0,
-      "name": "string",
-      "description": "string",
-      "createdAt": "2023-06-15T23:55:17.371Z",
-      "user": {
-        "id": 0,
-        "username": "string",
-        "displayName": "string",
-        "email": "string",
-        "createdAt": "2023-06-15T23:55:17.371Z",
-        "tasks": [
-          "string"
-        ]
-      },
-      "timeLogs": [
-        "string"
-      ]
-    }
+    "id": 2,
+    "startTime": "2023-06-18T19:17:23.404Z",
+    "endTime": "2023-06-18T19:17:23.404Z",
+    "endedByUser": false
   }
 ]
 ```
@@ -734,29 +694,10 @@ This endpoint returns the time log associated with the provided ID.
 ```json
 {
   "id": 0,
-  "startTime": "2023-06-15T23:55:17.371Z",
-  "endTime": "2023-06-15T23:55:17.371Z",
+  "startTime": "2023-06-18T19:28:05.189Z",
+  "endTime": "2023-06-18T19:28:05.190Z",
   "endedByUser": true,
-  "taskState": "ONGOING",
-  "task": {
-    "id": 0,
-    "name": "string",
-    "description": "string",
-    "createdAt": "2023-06-15T23:55:17.371Z",
-    "user": {
-      "id": 0,
-      "username": "string",
-      "displayName": "string",
-      "email": "string",
-      "createdAt": "2023-06-15T23:55:17.371Z",
-      "tasks": [
-        "string"
-      ]
-    },
-    "timeLogs": [
-      "string"
-    ]
-  }
+  "taskName": "string"
 }
 ```
 
