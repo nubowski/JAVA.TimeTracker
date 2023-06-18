@@ -32,15 +32,12 @@ public interface TimeLogRepository extends JpaRepository <TimeLog, Long> {
     // method to fetch TimeLogs by user and data range
     // TODO: too complex and unreadable for newbies (like me). But MUCH faster and independent of traffic
 
-    @Query(value = "SELECT SUM(EXTRACT(EPOCH FROM (" +
-            "LEAST(COALESCE(t.end_time, CURRENT_TIMESTAMP), :end) - " +
-            "GREATEST(t.start_time, :start)))) " +
+    @Query(value = "SELECT SUM(EXTRACT(EPOCH FROM (LEAST(COALESCE(t.end_time, CURRENT_TIMESTAMP), :end) - GREATEST(t.start_time, :start)))) " +
             "FROM time_logs t " +
             "INNER JOIN tasks task ON t.task_id = task.id " +
             "WHERE task.user_id = :user_id AND ((t.start_time < :end AND t.end_time > :start) OR (t.end_time IS NULL AND t.start_time < :end)) " +
-            "HAVING SUM(EXTRACT(EPOCH FROM (" +
-            "LEAST(COALESCE(t.end_time, CURRENT_TIMESTAMP), :end) - " +
-            "GREATEST(t.start_time, :start)))) > 0", nativeQuery = true)
+            "HAVING SUM(EXTRACT(EPOCH FROM (LEAST(COALESCE(t.end_time, CURRENT_TIMESTAMP), :end) - GREATEST(t.start_time, :start)))) > 0",
+            nativeQuery = true)
     Long getTotalWorkEffortInSeconds(@Param("user_id") Long id, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
 }
