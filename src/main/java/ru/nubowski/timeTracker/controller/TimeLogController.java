@@ -5,21 +5,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.nubowski.timeTracker.dto.response.TimeLogByIdResponse;
+import ru.nubowski.timeTracker.dto.response.TimeLogsByTaskResponse;
+import ru.nubowski.timeTracker.mapper.TimeLogMapper;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.service.impl.TaskService;
 import ru.nubowski.timeTracker.service.impl.TimeLogService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/time_logs")
 public class TimeLogController {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeLogController.class);
+    private final TimeLogMapper timeLogMapper;
     private final TimeLogService timeLogService;
     private final TaskService taskService;
 
-    public TimeLogController(TimeLogService timeLogService, TaskService taskService) {
+    public TimeLogController(TimeLogMapper timeLogMapper, TimeLogService timeLogService, TaskService taskService) {
+        this.timeLogMapper = timeLogMapper;
         this.timeLogService = timeLogService;
         this.taskService = taskService;
     }
@@ -34,20 +40,24 @@ public class TimeLogController {
 
     // TODO need to convent of where is where (task->time-logs OR time-logs->task)
     @GetMapping("/task/{taskId}")
-    public ResponseEntity<List<TimeLog>> getTimeLogsByTask(@PathVariable Long taskId) {
+    public ResponseEntity<List<TimeLogsByTaskResponse>> getTimeLogsByTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to get time logs for task with id {}", taskId);
         Task task = taskService.getTask(taskId);
         List<TimeLog> timeLogs = timeLogService.getAllTimeLogsForTask(task);
+        List<TimeLogsByTaskResponse> responses = timeLogs.stream()
+                .map(timeLogMapper::mapTimeLogToResponse)
+                .collect(Collectors.toList());
         LOGGER.info("Responding with {} time logs for task with id {}", timeLogs.size(), taskId);
-        return ResponseEntity.ok(timeLogs);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TimeLog> getTimeLog(@PathVariable Long id) {
+    public ResponseEntity<TimeLogByIdResponse> getTimeLog(@PathVariable Long id) {
         LOGGER.info("Received request to get time log with id {}", id);
         TimeLog timeLog = timeLogService.getTimeLog(id);
+        TimeLogByIdResponse timeLogResponse = new TimeLogByIdResponse(timeLog);
         LOGGER.info("Responding with time log with id {}", id);
-        return ResponseEntity.ok(timeLog);
+        return ResponseEntity.ok(timeLogResponse);
     }
 
     @PostMapping
