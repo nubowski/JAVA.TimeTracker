@@ -26,7 +26,7 @@ public class UserMapper {
         if (request.getDisplayName() != null && !request.getDisplayName().isEmpty()) {
             user.setDisplayName(request.getDisplayName());
         }
-        // set other..
+        // set other if needed...
         return user;
     }
 }
