@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.service.impl.TaskService;
-import ru.nubowski.timeTracker.service.impl.TimeLogService;
 import ru.nubowski.timeTracker.service.impl.UserService;
 import ru.nubowski.timeTracker.util.CustomClockProvider;
 
@@ -44,8 +43,6 @@ public class UserTestCase {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private TimeLogService timeLogService;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -182,7 +179,8 @@ public class UserTestCase {
         objectMapper.registerModule(new JavaTimeModule());
 
         // deserialize content
-        List<TimeLog> timeLogs = objectMapper.readValue(content, new TypeReference<List<TimeLog>>(){});
+        List<TimeLog> timeLogs = objectMapper.readValue(content, new TypeReference<>() {
+        });
 
         // for each TimeLog, compare start and end times with expected times
         for (TimeLog timeLog : timeLogs) {
@@ -274,7 +272,7 @@ public class UserTestCase {
         LOGGER.info("Tasks are created and initiated");
 
         // get all tasks for user in a period
-        MvcResult mvcResult = mockMvc.perform(get("/time_logs/user/{username}/date_range?start={start}&end={end}",
+        MvcResult mvcResult = mockMvc.perform(get("/users/{username}/time_logs/date_range?start={start}&end={end}",
                         "time_user",
                         LocalDateTime.now().minusDays(1).toString(),
                         LocalDateTime.now().toString())
@@ -354,7 +352,7 @@ public class UserTestCase {
         LOGGER.info("Tasks are created and initiated");
 
         // get all work intervals for user in a period
-        MvcResult mvcResult = mockMvc.perform(get("/time_logs/user/{username}/date_range?start={start}&end={end}&output=interval",
+        MvcResult mvcResult = mockMvc.perform(get("/users/{username}/time_logs/date_range?start={start}&end={end}&output=interval",
                         "time_user",
                         LocalDateTime.now().minusDays(5).toString(),
                         LocalDateTime.now().toString())
@@ -364,7 +362,8 @@ public class UserTestCase {
 
         // extract
         String contentAsString = mvcResult.getResponse().getContentAsString();
-        List<String> returnedWorkIntervals = objectMapper.readValue(contentAsString, new TypeReference<List<String>>() {});
+        List<String> returnedWorkIntervals = objectMapper.readValue(contentAsString, new TypeReference<>() {
+        });
         LOGGER.info("Returned work intervals: {}", returnedWorkIntervals);
 
         // Create expected list of work intervals
@@ -474,7 +473,7 @@ public class UserTestCase {
 
         LOGGER.info("Tasks are created and initiated");
 
-        MvcResult mvcResult = mockMvc.perform(get("/time_logs/user/{username}/work_effort?start={start}&end={end}&",
+        MvcResult mvcResult = mockMvc.perform(get("/users/{username}/work_effort?start={start}&end={end}&",
                         "time_user",
                         LocalDateTime.now().minusDays(8).toString(),
                         LocalDateTime.now().minusDays(1).toString())  // for a week with a 1 day before slice

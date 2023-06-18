@@ -1,12 +1,9 @@
 package ru.nubowski.timeTracker.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MvcResult;
 import ru.nubowski.timeTracker.model.TaskState;
 import ru.nubowski.timeTracker.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +17,8 @@ import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.service.impl.TaskService;
 import ru.nubowski.timeTracker.service.impl.TimeLogService;
 import ru.nubowski.timeTracker.service.impl.UserService;
-import ru.nubowski.timeTracker.util.CustomClockProvider;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,15 +33,11 @@ public class TaskControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private TimeLogService timeLogService;
     @Autowired
     private TaskService taskService;
     @Autowired
     private UserService userService;
-    @Autowired
-    private CustomClockProvider clockProvider;
 
 
     @Transactional
@@ -139,94 +130,5 @@ public class TaskControllerTest {
         assertEquals(2, timeLogsAfterStop.size(), "Should still be 2 TimeLogs after stopping the task");
         assertEquals(TaskState.USER_STOPPED, timeLogsAfterStop.get(0).getTaskState(), "Task 1 state should be USER_STOPPED after stopping the task");
         assertEquals(TaskState.USER_STOPPED, timeLogsAfterStop.get(1).getTaskState(), "Task 2 state should be USER_STOPPED after stopping the task");
-    }
-
-    @Transactional
-    @Test
-    void testGetAllUserTasksInPeriodSortedByTimeSpent() throws Exception {
-        // create user
-        User user = new User();
-        user.setUsername("time_user");
-        user.setDisplayName("nagibator9000");
-        user.setEmail("test@mail.com");
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
-                        .andExpect(status().isCreated());
-
-            // create tasks
-
-            User savedUser = userService.getUserByUsernameNotOptional(user.getUsername());
-
-            Task task1 = new Task();
-            task1.setName("testTask1");
-            task1.setDescription("Some description to be sure it is working OK");
-            task1.setUser(savedUser);
-            task1 = taskService.saveTask(task1);
-
-            Task task2 = new Task();
-            task2.setName("testTask2");
-            task2.setDescription("Some description to be sure it is working OK");
-            task2.setUser(savedUser);
-            task2 = taskService.saveTask(task2);
-
-            Task task3 = new Task();
-            task3.setName("testTask3");
-            task3.setDescription("Some description to be sure it is working OK");
-            task3.setUser(savedUser);
-            task3 = taskService.saveTask(task3);
-            // emulate of start and stop tasks
-            // could be done by loop, but want to make it as clear as possible
-
-            // task1
-            clockProvider.minusTime(Duration.ofHours(10));
-            mockMvc.perform(post("/tasks/start/" + task1.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isCreated());
-            clockProvider.plusTime(Duration.ofMinutes(10));
-            mockMvc.perform(post("/tasks/stop/" + task1.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-            clockProvider.resetTime();
-
-            // task2
-            clockProvider.minusTime(Duration.ofDays(3));
-            mockMvc.perform(post("/tasks/start/" + task2.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isCreated());
-            clockProvider.plusTime(Duration.ofMinutes(49));
-            mockMvc.perform(post("/tasks/stop/" + task2.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-            clockProvider.resetTime();
-
-            // task3
-            clockProvider.minusTime(Duration.ofHours(1));
-            mockMvc.perform(post("/tasks/start/" + task3.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isCreated());
-            clockProvider.resetTime();
-            LOGGER.info("Tasks are created and initiated");
-
-        // get all tasks for user in a period
-        MvcResult mvcResult = mockMvc.perform(get("/time_logs/user/{username}/date_range?start={start}&end={end}",
-                        "time_user",
-                        LocalDateTime.now().minusDays(1).toString(),
-                        LocalDateTime.now().toString())
-                        .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andReturn();
-        // extract
-        String contentAsString = mvcResult.getResponse().getContentAsString();
-        List<String> returnedTasks = objectMapper.readValue(contentAsString, new TypeReference<>() {});
-        LOGGER.info("Returned tasks: {}", returnedTasks);
-
-        List<String> expectedTasks = List.of(
-                String.format("%s - 01:00", task3.getName()),
-                String.format("%s - 00:10", task1.getName())
-        );
-
-        assertEquals(expectedTasks, returnedTasks);
     }
 }

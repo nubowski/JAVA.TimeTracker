@@ -23,7 +23,7 @@ public class TaskMapper {
     }
     public TaskToResponse mapTaskToResponse(Task task) {
         // we don't need setter yet. constructor did all the things.
-        // but left them to keep in mind to opportunity change things AFTER constructor
+        // but left them to keep in mind for opportunity to change things AFTER constructor
         TaskToResponse response = new TaskToResponse(task);
         response.setId(task.getId());
         response.setName(task.getName());

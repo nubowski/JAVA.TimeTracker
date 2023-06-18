@@ -13,8 +13,10 @@ import ru.nubowski.timeTracker.mapper.TaskMapper;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
 import ru.nubowski.timeTracker.service.impl.TaskService;
+import ru.nubowski.timeTracker.service.impl.TimeLogService;
 import ru.nubowski.timeTracker.service.impl.UserService;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,11 +27,13 @@ public class TaskController {
     private final TaskMapper taskMapper;
     private final TaskService taskService;
     private final UserService userService;
+    private final TimeLogService timeLogService;
 
-    public TaskController(TaskMapper taskMapper, TaskService taskService, UserService userService) {
+    public TaskController(TaskMapper taskMapper, TaskService taskService, UserService userService, TimeLogService timeLogService) {
         this.taskMapper = taskMapper;
         this.taskService = taskService;
         this.userService = userService;
+        this.timeLogService = timeLogService;
     }
 
     @GetMapping
@@ -133,26 +137,12 @@ public class TaskController {
         return ResponseEntity.ok(timeLog);
     }
 
-    /*@PostMapping("/start/{taskName}")
-    public ResponseEntity<TimeLog> startTask(@PathVariable String username ,String taskName) {
-        LOGGER.info("Received request to start task {}", taskName);
-        try {
-            Task task = taskService.getTaskByName(username, taskName);
-            TimeLog timeLog = taskService.startTask(task);
-            LOGGER.info("Task {} has been started", taskName);  // don't think its necessary coz of custom ex, but just in case
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            LOGGER.error("Error occurred while starting task with id {}", taskName, e);
-            throw e;
-        }
+    @GetMapping("/{taskId}/time_elapsed")
+    public ResponseEntity<Duration> getTaskTimeElapsed(@PathVariable Long taskId) {
+        LOGGER.info("Received request to get time elapsed for task with id {}", taskId);
+        Task task = taskService.getTask(taskId);
+        Duration timeElapsed = timeLogService.getTaskTimeElapsed(task);
+        LOGGER.info("Time elapsed for task with id {} is {}", taskId, timeElapsed);
+        return ResponseEntity.ok(timeElapsed);
     }
-
-    @PostMapping("/stop/{taskName}")
-    public ResponseEntity<?> stopTask(@PathVariable String taskName) {
-        LOGGER.info("Received request to stop task {}", taskName);
-        Task task = taskService.getTaskByName(taskName);
-        TimeLog timeLog = taskService.stopTask(task);
-        LOGGER.info("Task {} has been stopped", taskName);
-        return ResponseEntity.ok(HttpStatus.OK);
-    }*/
 }
