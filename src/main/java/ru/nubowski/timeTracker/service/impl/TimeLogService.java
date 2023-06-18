@@ -14,7 +14,12 @@ import ru.nubowski.timeTracker.repository.TimeLogRepository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class TimeLogService {
@@ -128,4 +133,45 @@ public class TimeLogService {
         }
         return totalDuration;
     }
+
+    public List<Map.Entry<Task, Long>> sortTimeLogs(List<TimeLog> timeLogs, String sort, LocalDateTime end) {
+        if (sort.equals("start_time")) {
+            timeLogs.sort(Comparator.comparing(TimeLog::getStartTime));
+        }
+        Map<Task, Long> durationsPerTask = timeLogs.stream()
+                .collect(Collectors.groupingBy(
+                        TimeLog::getTask,
+                        Collectors.summingLong(log -> Duration.between(log.getStartTime(), log.getEndTime() != null ? log.getEndTime() : end.isBefore(LocalDateTime.now()) ? end : LocalDateTime.now()).toMillis())
+                ));
+        Stream<Map.Entry<Task, Long>> stream = durationsPerTask.entrySet().stream();
+        if (sort.equals("duration")) {
+            stream = stream.sorted(Map.Entry.<Task, Long>comparingByValue().reversed());
+        }
+        return stream.collect(Collectors.toList());
+    }
+
+    public List<String> formatTimeLogs(List<TimeLog> timeLogs, List<Map.Entry<Task, Long>> sortedTimeLogs, String output) {
+        if (output.equals("duration")) {
+            return sortedTimeLogs.stream()
+                    .map(entry -> {
+                        Task task = entry.getKey();
+                        Duration duration = Duration.ofMillis(entry.getValue());
+                        return String.format("%s - %02d:%02d",
+                                task.getName(),
+                                duration.toHours(),
+                                duration.toMinutesPart());
+                    })
+                    .collect(Collectors.toList());
+        }
+        if (output.equals("interval")) {
+            return timeLogs.stream()
+                    .map(log -> String.format("%s - %s | %s",
+                            log.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                            log.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                            log.getTask().getName()))
+                    .collect(Collectors.toList());
+        }
+        throw new IllegalArgumentException("Unexpected output value: " + output);
+    }
+
 }

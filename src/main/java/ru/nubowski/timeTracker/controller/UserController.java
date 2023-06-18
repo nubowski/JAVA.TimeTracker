@@ -112,64 +112,19 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/{username}/time_logs/date_range") // TODO clean this up and make it lean. Kick all the logic out
+    @GetMapping("/{username}/time_logs/date_range")
     public ResponseEntity<List<String>> getTimeLogsByUserAndDateRange(
             @PathVariable String username,
-            @RequestParam("start")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime start,
-            @RequestParam("end")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime end,
-            @RequestParam(value = "sort", required = false, defaultValue = "duration")
-            String sort,
-            @RequestParam(value = "output", required = false, defaultValue = "duration")
-            String output) {
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+            @RequestParam(value = "sort", required = false, defaultValue = "duration") String sort,
+            @RequestParam(value = "output", required = false, defaultValue = "duration") String output) {
 
         LOGGER.info("Fetching time logs for user {} in date range from {} to {}", username, start, end);
         User user = userService.getUser(username);
         List<TimeLog> timeLogs = timeLogService.getTimeLogsByUserAndDateRange(user, start, end);
-
-        // by start time if requested
-        if (sort.equals("start_time")) {
-            timeLogs.sort(Comparator.comparing(TimeLog::getStartTime));
-        }
-
-        Map<Task, Long> durationsPerTask = timeLogs.stream()
-                .collect(Collectors.groupingBy(
-                        TimeLog::getTask,
-                        Collectors.summingLong(log -> Duration.between(log.getStartTime(), log.getEndTime() != null ? log.getEndTime() : end.isBefore(LocalDateTime.now()) ? end : LocalDateTime.now()).toMillis())
-                ));
-
-        Stream<Map.Entry<Task, Long>> stream = durationsPerTask.entrySet().stream();
-
-        // by duration if requested
-        if (sort.equals("duration")) {
-            stream = stream.sorted(Map.Entry.<Task, Long>comparingByValue().reversed());
-        }
-
-        List<String> formattedTimeLogs;
-
-        // choose output format
-        if (output.equals("duration")) {
-            formattedTimeLogs = stream
-                    .map(entry -> {
-                        Task task = entry.getKey();
-                        Duration duration = Duration.ofMillis(entry.getValue());
-                        return String.format("%s - %02d:%02d",
-                                task.getName(),
-                                duration.toHours(),
-                                duration.toMinutesPart());
-                    })
-                    .collect(Collectors.toList());
-        } else {  // "interval"
-            formattedTimeLogs = timeLogs.stream()
-                    .map(log -> String.format("%s - %s | %s",
-                            log.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                            log.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                            log.getTask().getName()))
-                    .collect(Collectors.toList());
-        }
+        List<Map.Entry<Task, Long>> sortedTimeLogs = timeLogService.sortTimeLogs(timeLogs, sort, end);
+        List<String> formattedTimeLogs = timeLogService.formatTimeLogs(timeLogs, sortedTimeLogs, output);
         LOGGER.info("Fetched {} time logs for user {} in date range from {} to {}", formattedTimeLogs.size(), username, start, end);
         return ResponseEntity.ok(formattedTimeLogs);
     }
