@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ru.nubowski</groupId>
 	<artifactId>timeTracker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<name>timeTracker</name>
 	<description>rest-spring-sql training</description>
 	<properties>
