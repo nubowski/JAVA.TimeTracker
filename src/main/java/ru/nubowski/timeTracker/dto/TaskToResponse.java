@@ -11,6 +11,7 @@ public class TaskToResponse {
     private LocalDateTime createdAt;
     private String username;
 
+    // BIG NAMING QUESTION. it's a DTO for GET all tasks... and should be different with GET one exactly task, but naming
     public TaskToResponse(Task task) {
         this.id = task.getId();
         this.name = task.getName();
