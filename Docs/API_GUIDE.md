@@ -25,19 +25,17 @@ Example: `curl -X GET http://localhost:8080/users`
   {
     "id": 3702,
     "username": "test_user",
-    "displayName": "nagibator9000",
     "email": "test@user.com",
-    "createdAt": "2023-06-15T01:39:59.583057",
-    "tasks": []
+    "displayName": "nagibator9000",
+    "createdAt": "2023-06-15T01:39:59.583057"
   },
   
   {
     "id": 1927,
     "username": "old_user",
-    "displayName": "Old Ben",
     "email": "ke@nobi.com",
-    "createdAt": "2022-03-15T13:32:13.192847",
-    "tasks": []
+    "displayName": "Old Ben",
+    "createdAt": "2022-03-15T13:32:13.192847"
   }
 ]
 ```
@@ -104,8 +102,7 @@ This endpoint creates a new user with the provided details.
 }
 ```
 
-Example: `curl -X POST -H "Content-Type: application/json" -d '{"username":"test_user", "email":"test@user.com", "displayName":"nagibator9000"}' http://localhost:8080/users
-`
+Example: `curl -X POST -H "Content-Type: application/json" -d '{"username":"test_user", "email":"test@user.com", "displayName":"nagibator9000"}' http://localhost:8080/users`
 
 <details>
 <summary>Example Response:</summary>
@@ -116,8 +113,7 @@ Example: `curl -X POST -H "Content-Type: application/json" -d '{"username":"test
   "username": "test_user",
   "displayName": "nagibator9000",
   "email": "test@user.com",
-  "createdAt": "2023-06-15T01:39:59.5830572",
-  "tasks": []
+  "createdAt": "2023-06-15T01:39:59.5830572"
 }
 ```
 
@@ -139,7 +135,7 @@ You can send `null` or empty string `""` it will not re-write the existing data.
 }
 ```
 
-Example: `curl -X PUT -H "Content-Type: application/json" -d "{"email":"user@test.com", "displayName":"Old Ben"}" http://localhost:8080/users/{username}`
+Example: `curl -X PUT -H "Content-Type: application/json" -d '{"email":"user@test.com", "displayName":"Old Ben"}' http://localhost:8080/users/{username}`
 
 <details>
 <summary>Example Response:</summary>
@@ -150,8 +146,7 @@ Example: `curl -X PUT -H "Content-Type: application/json" -d "{"email":"user@tes
   "username": "test_user",
   "displayName": "Old Ben",
   "email": "user@test.com",
-  "createdAt": "2023-06-15T01:39:59.583057",
-  "tasks": []
+  "createdAt": "2023-06-15T01:39:59.583057"
 }
 ```
 
@@ -161,7 +156,7 @@ Example: `curl -X PUT -H "Content-Type: application/json" -d "{"email":"user@tes
 
 
 This endpoint is intended to delete the user associated with the provided username.
-But saved archived tracker data.
+But saved and migrate archived tracker data.
 However, it is currently under construction and may not function as expected.
 
 - Endpoint: `/{username}`
@@ -172,7 +167,7 @@ Example: `curl -X DELETE http://localhost:8080/users/{username}`
 <details>
 <summary>Example Response:</summary>
 
-RESPONSE_PLACEHOLDER
+NOT_IMPLEMENTED
 
 </details>
 
@@ -219,6 +214,68 @@ Example: `curl -X DELETE http://localhost:8080/users/{username}/reset`
 
 </details>
 
+### Get TimeLogs by User and Date Range
+
+
+This endpoint gets the time logs of a user within a certain date range.
+You can also specify the sort order and the output format.
+
+**sort**: way of sorting output (default value `duration`)
+
+`start_time` - first by added to the tracker
+
+`duration` - first by time spent
+
+**output**: output format (default value `duration`)
+
+`duration` - duration HH:mm format
+
+`interval` - interval of date:time (under construction)
+
+**date format** - `2023-06-18T15:30:00`  ISO 8601
+
+
+- Endpoint: `/user/{username}/date_range`
+- Method: `GET`
+- Example: `curl -X GET "http://localhost:8080/users/{username}/time_logs/date_range?start={start_date}&end={end_date}&sort={sort_order}&output={output_format}"`
+
+- For intervals output: `curl -X GET "http://localhost:8080/users/test_user/time_logs/date_range?start=2023-06-17T12:00:00&end=2023-06-18T15:30:00&sort=duration&output=duration"`
+- For durations output: `curl -X GET "http://localhost:8080/users/test_user/time_logs/date_range?start=2023-06-17T12:00:00&end=2023-06-18T15:30:00&sort=start_time&output=interval"`
+
+<details>
+<summary>Example Response:</summary>
+
+```json
+["2023-06-13 17:43 - 2023-06-13 22:00 | testTask1, 2023-06-13 02:43 - 2023-06-13 03:32 | testTask2"]
+```
+
+```json
+["testTask1 - 04:17, testTask2 - 00:49"]
+```
+
+</details>
+
+### Get Total Work Effort by User and Date Range
+
+
+This endpoint calculates the total work effort of a user within a certain date range.
+
+**date format** - `2023-06-18T15:30:00`  ISO 8601
+
+
+
+- Endpoint: `/{username}/work_effort`
+- Method: `GET`
+- Example: `curl -X GET "http://localhost:8080/time_logs/user/{username}/work_effort?start={start_date}&end={end_date}"`
+
+<details>
+<summary>Example Response:</summary>
+
+```json
+["HH:mm"]
+```
+
+</details>
 
 
 ## Task Controller
@@ -706,59 +763,7 @@ OK
 
 </details>
 
-### Get TimeLogs by User and Date Range
 
-
-This endpoint gets the time logs of a user within a certain date range. 
-You can also specify the sort order and the output format.
-
-**sort**: way of sorting output (default value `duration`)
-
-`start_time` - first by added to the tracker
-
-`duration` - first by time spent
-
-**output**: output format (default value `duration`)
-
-`duration` - duration HH:mm format
-
-`interval` - interval of date:time (under construction)
-
-
-- Endpoint: `/user/{username}/date_range`
-- Method: `GET`
-- Example: `curl -X GET "http://localhost:8080/time_logs/user/{username}/date_range?start={start_date}&end={end_date}&sort={sort_order}&output={output_format}"`
-
-<details>
-<summary>Example Response:</summary>
-
-```json
-["2023-06-13 17:43 - 2023-06-13 22:00 | testTask1, 2023-06-13 02:43 - 2023-06-13 03:32 | testTask2"]
-```
-
-```json
-["testTask1 - 04:17, testTask2 - 00:49"]
-```
-
-</details>
-
-### Get Total Work Effort by User and Date Range
-
-
-This endpoint calculates the total work effort of a user within a certain date range.
-
-- Endpoint: `/user/{username}/work_effort`
-- Method: `GET`
-- Example: `curl -X GET "http://localhost:8080/time_logs/user/{username}/work_effort?start={start_date}&end={end_date}"`
-
-<details>
-<summary>Example Response:</summary>
-
-```json
-["HH:mm"]
-```
-
-</details>
 
 
 
