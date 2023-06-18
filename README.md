@@ -21,7 +21,14 @@ For more detailed information about the API and how to use it, please refer to o
 4. Unpack it and `cmd>` root `docker compose up -d` or click the `lazy-button.bat`
 5. Follow the [API guide](https://github.com/nubowski/JAVA.TimeTracker/blob/master/Docs/API_GUIDE.md) provided.
 
-## Contributing
+<details>
+<summary>Have a testing field tho:</summary>
+
+`94.19.184.24:23322/swagger-ui/index.html`
+and the same `IP` and `port` for the playground
+server could be offline, just in case
+
+</details>
 
 
 ## License
