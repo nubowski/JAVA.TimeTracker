@@ -1,4 +1,4 @@
-package ru.nubowski.timeTracker.dto;
+package ru.nubowski.timeTracker.dto.response;
 
 import ru.nubowski.timeTracker.model.Task;
 

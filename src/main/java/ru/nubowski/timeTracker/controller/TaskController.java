@@ -7,8 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nubowski.timeTracker.dto.TaskToResponse;
-import ru.nubowski.timeTracker.dto.TaskCreateRequest;
-import ru.nubowski.timeTracker.dto.TaskCreateResponse;
+import ru.nubowski.timeTracker.dto.request.TaskCreateRequest;
+import ru.nubowski.timeTracker.dto.response.TaskCreateResponse;
+import ru.nubowski.timeTracker.dto.response.TaskStateResponse;
 import ru.nubowski.timeTracker.mapper.TaskMapper;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
@@ -36,6 +37,7 @@ public class TaskController {
         this.timeLogService = timeLogService;
     }
 
+    // seems lise useless as is. should to return .size()
     @GetMapping
     public ResponseEntity<List<TaskToResponse>> getAllTasks() {
         LOGGER.info("Received request to get all tasks");
@@ -55,15 +57,6 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
-        LOGGER.info("Received request to update task with id: {} with data: {}", id, task);
-        task.setId(id);
-        Task updatedTask = taskService.saveTask(task);
-        LOGGER.info("Updated task with id: {}", updatedTask.getId());
-        return ResponseEntity.ok(updatedTask);
-    }
-
     @PostMapping("/{username}")
     public ResponseEntity<TaskCreateResponse> createTask(@PathVariable String username, @Valid @RequestBody TaskCreateRequest request) {
         LOGGER.info("Received request to create task: {} attached to the user {}", request.getName(), username);
@@ -76,14 +69,14 @@ public class TaskController {
         return new ResponseEntity<>(new TaskCreateResponse(createdTask), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{username}/{taskName}")
-    public ResponseEntity<TaskCreateResponse> updateTask(@PathVariable String username, @PathVariable String taskName, @RequestBody TaskCreateRequest request) {
-        LOGGER.info("Received request to update task with username: {} and taskName: {}", username, taskName);
-        if (!taskService.taskIsPresent(username, taskName)) {
-            LOGGER.error("Task not found with username: {} and taskName: {}", username, taskName);
+    @PutMapping("/{id}")
+    public ResponseEntity<TaskCreateResponse> updateTask(@PathVariable Long id, @RequestBody TaskCreateRequest request) {
+        LOGGER.info("Received request to update task with id: {}", id);
+        if (!taskService.taskIsPresent(id)) {
+            LOGGER.error("Task not found with id: {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Task updatedTask = taskService.updateTask(username, taskName, request);
+        Task updatedTask = taskService.updateTask(id, request);
             LOGGER.info("Updated task with id: {}", updatedTask.getId());
             return new ResponseEntity<>(new TaskCreateResponse(updatedTask), HttpStatus.CREATED);
     }
@@ -93,17 +86,18 @@ public class TaskController {
         LOGGER.info("Received request to delete task with id: {}", id);
         taskService.deleteTask(id);
         LOGGER.info("Deleted task with id: {}", id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204 is OK or feedback?
     }
 
     @PostMapping("/start/{taskId}")
-    public ResponseEntity<TimeLog> startTask(@PathVariable Long taskId) {
+    public ResponseEntity<TaskStateResponse> startTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to start task with id {}", taskId);
         try {
             Task task = taskService.getTask(taskId);
             TimeLog timeLog = taskService.startTask(task);
             LOGGER.info("Task with id {} has been started", taskId);  // don't think its necessary coz of custom ex, but just in case
-            return new ResponseEntity<>(timeLog, HttpStatus.CREATED);
+            TaskStateResponse responseDTO = new TaskStateResponse(timeLog);
+            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
         } catch (Exception e) {
             LOGGER.error("Error occurred while starting task with id {}", taskId, e);
             throw e;
@@ -111,30 +105,33 @@ public class TaskController {
     }
 
     @PostMapping("/stop/{taskId}")
-    public ResponseEntity<TimeLog> stopTask(@PathVariable Long taskId) {
+    public ResponseEntity<TaskStateResponse> stopTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to stop task with id {}", taskId);
         Task task = taskService.getTask(taskId);
         TimeLog timeLog = taskService.stopTask(task);
         LOGGER.info("Task with id {} has been stopped", taskId);
-        return ResponseEntity.ok(timeLog);
+        TaskStateResponse responseDTO = new TaskStateResponse(timeLog);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PostMapping("/pause/{taskId}")
-    public ResponseEntity<TimeLog> pauseTask(@PathVariable Long taskId) {
+    public ResponseEntity<TaskStateResponse> pauseTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to pause task with id {}", taskId);
         Task task = taskService.getTask(taskId);
         TimeLog timeLog = taskService.pauseTask(task);
         LOGGER.info("Task with id {} has been paused", taskId);
-        return ResponseEntity.ok(timeLog);
+        TaskStateResponse responseDTO = new TaskStateResponse(timeLog);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PostMapping("/resume/{taskId}")
-    public ResponseEntity<TimeLog> resumeTask(@PathVariable Long taskId) {
+    public ResponseEntity<TaskStateResponse> resumeTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to resume task with id {}", taskId);
         Task task = taskService.getTask(taskId);
         TimeLog timeLog = taskService.resumeTask(task);
         LOGGER.info("Task with id {} has been resumed", taskId);
-        return ResponseEntity.ok(timeLog);
+        TaskStateResponse responseDTO = new TaskStateResponse(timeLog);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping("/{taskId}/time_elapsed")

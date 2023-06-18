@@ -2,7 +2,7 @@ package ru.nubowski.timeTracker.mapper;
 
 import org.springframework.stereotype.Service;
 import ru.nubowski.timeTracker.dto.TaskToResponse;
-import ru.nubowski.timeTracker.dto.TaskCreateRequest;
+import ru.nubowski.timeTracker.dto.request.TaskCreateRequest;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.service.impl.UserService;
 

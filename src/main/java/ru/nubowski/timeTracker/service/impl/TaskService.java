@@ -3,7 +3,7 @@ package ru.nubowski.timeTracker.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.nubowski.timeTracker.dto.TaskCreateRequest;
+import ru.nubowski.timeTracker.dto.request.TaskCreateRequest;
 import ru.nubowski.timeTracker.exception.OngoingTaskNotFoundException;
 import ru.nubowski.timeTracker.exception.TaskNotFoundException;
 import ru.nubowski.timeTracker.model.Task;
@@ -99,8 +99,8 @@ public class TaskService {
         return timeLogRepository.save(timeLog);
     }
 
-    public Task updateTask(String username, String taskName, TaskCreateRequest request) {
-        Task taskToUpdate = taskRepository.findByUserUsernameAndName(username, taskName).get(); // fixed doubling, and now .get without isPresent -_-
+    public Task updateTask(Long id, TaskCreateRequest request) {
+        Task taskToUpdate = taskRepository.findById(id).get(); // fixed doubling, and now .get without isPresent -_-
         taskToUpdate.setName(request.getName());
         taskToUpdate.setDescription(request.getDescription());
         taskRepository.save(taskToUpdate);
@@ -108,8 +108,8 @@ public class TaskService {
         return taskToUpdate;
     }
 
-    public boolean taskIsPresent(String username, String taskName) {
-        Optional<Task> checkTask = taskRepository.findByUserUsernameAndName(username, taskName);
+    public boolean taskIsPresent(Long id) {
+        Optional<Task> checkTask = taskRepository.findById(id);
         return checkTask.isPresent();
     }
 }
