@@ -18,7 +18,7 @@ For more detailed information about the API and how to use it, please refer to o
 1. Install Docker: You would need to have [Docker](https://docs.docker.com/get-docker/) installed on your machine to run the application. 
 2. Get the last [snapshot](https://github.com/nubowski/JAVA.TimeTracker/tags) and download it.
 3. Change properties if needed in `docker-compose.yml`.
-4. Unpack it and `cmd>` root `docker compose up` or click the `lazy-button.bat`
+4. Unpack it and `cmd>` root `docker compose up -d` or click the `lazy-button.bat`
 5. Follow the [API guide](https://github.com/nubowski/JAVA.TimeTracker/blob/master/Docs/API_GUIDE.md) provided.
 
 ## Contributing
