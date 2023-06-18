@@ -1,7 +1,6 @@
-package ru.nubowski.timeTracker.dto;
+package ru.nubowski.timeTracker.dto.request;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
 
 public class UserUpdateRequest {

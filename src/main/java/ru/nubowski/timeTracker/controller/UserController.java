@@ -1,5 +1,9 @@
 package ru.nubowski.timeTracker.controller;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,8 +11,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.nubowski.timeTracker.dto.UserCreateRequest;
-import ru.nubowski.timeTracker.dto.UserUpdateRequest;
+import ru.nubowski.timeTracker.dto.request.UserCreateRequest;
+import ru.nubowski.timeTracker.dto.request.UserUpdateRequest;
+import ru.nubowski.timeTracker.dto.response.UsersGetResponse;
 import ru.nubowski.timeTracker.mapper.UserMapper;
 import ru.nubowski.timeTracker.model.Task;
 import ru.nubowski.timeTracker.model.TimeLog;
@@ -19,12 +24,9 @@ import ru.nubowski.timeTracker.service.impl.UserService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/users")
@@ -43,11 +45,14 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers(){
+    public ResponseEntity<List<UsersGetResponse>> getAllUsers() {
         LOGGER.info("Received request to get all users");
         List<User> users = userService.getAllUsers();
-        LOGGER.info("Responding with {} users", users.size());
-        return ResponseEntity.ok(users);
+        List<UsersGetResponse> userDTOs = users.stream()
+                .map(userMapper::mapToUserGetResponse)
+                .collect(Collectors.toList());
+        LOGGER.info("Responding with {} users", userDTOs.size());
+        return ResponseEntity.ok(userDTOs);
     }
 
     @GetMapping("/{username}")
@@ -58,6 +63,9 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(implementation = UsersGetResponse.class)))})
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody UserCreateRequest request) {
         LOGGER.info("Received request to create user: {}", request.getUsername());
@@ -71,7 +79,9 @@ public class UserController {
         LOGGER.info("Created user: {}", createdUser.getUsername());
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
-
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(implementation = UsersGetResponse.class)))})
     @PutMapping("/{username}") // TODO: all is good until username is unique entity, if not - auth/auth/regis approach
     public ResponseEntity<User> updateUser(@PathVariable String username, @Valid @RequestBody UserUpdateRequest request) {
         LOGGER.info("Received request to update user with username: {} with data {}", username, request);
@@ -85,13 +95,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{username}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String username) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-
-        /*LOGGER.info("Received request to delete user with username: {}", username);
-        userService.deleteUser(username);
-        LOGGER.info("Deleted user with username: {}", username);
-        return ResponseEntity.noContent().build();*/
+    public ResponseEntity<String> deleteUser(@PathVariable String username) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Feature not yet implemented");
     }
 
     @DeleteMapping("/{username}/delete")
@@ -100,7 +105,7 @@ public class UserController {
         processService.deleteTimeLogsAndTasks(username);
         userService.deleteUser(username); // doubt about double controller reset/delete, should be 1 with keys
         LOGGER.info("Deleted user with username: {} and all their tasks", username);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // maybe add some feedback with string or 204 is enough
     }
 
     @DeleteMapping("/{username}/reset")

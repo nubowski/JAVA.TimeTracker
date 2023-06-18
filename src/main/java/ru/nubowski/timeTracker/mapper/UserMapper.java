@@ -1,8 +1,9 @@
 package ru.nubowski.timeTracker.mapper;
 
 import org.springframework.stereotype.Service;
-import ru.nubowski.timeTracker.dto.UserCreateRequest;
-import ru.nubowski.timeTracker.dto.UserUpdateRequest;
+import ru.nubowski.timeTracker.dto.request.UserCreateRequest;
+import ru.nubowski.timeTracker.dto.request.UserUpdateRequest;
+import ru.nubowski.timeTracker.dto.response.UsersGetResponse;
 import ru.nubowski.timeTracker.model.User;
 
 @Service
@@ -28,5 +29,10 @@ public class UserMapper {
         }
         // set other if needed...
         return user;
+    }
+
+    public UsersGetResponse mapToUserGetResponse(User user) {
+        // setters if needed
+        return new UsersGetResponse(user);
     }
 }
