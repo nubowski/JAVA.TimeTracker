@@ -11,16 +11,30 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+/**
+ * A component responsible for checking the connected database at startup.
+ * The check includes getting and logging the database product name.
+ * A warning message is logged if the connected database is not PostgreSQL.
+ */
 @Component
 public class DatabaseCheck {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseCheck.class);
     private final DataSource dataSource;
 
+    /**
+     * Constructs a new DatabaseCheck instance.
+     *
+     * @param databaseSource the data source from which to obtain connections
+     */
     @Autowired
     public DatabaseCheck (DataSource databaseSource) {
         this.dataSource = databaseSource;
     }
 
+    /**
+     * Checks the connected database at startup.
+     * Logs the database product name and a warning if the database is not PostgreSQL.
+     */
     @PostConstruct
     public void checkDatabase() {
         LOGGER.info("Requesting the meta data of the connected Database");

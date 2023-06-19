@@ -2,6 +2,9 @@ package ru.nubowski.timeTracker.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * DTO for creating a task.
+ */
 public class TaskCreateRequest {
     @NotBlank(message = "Task name is required")
     private String name;

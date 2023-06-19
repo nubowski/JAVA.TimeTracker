@@ -4,6 +4,9 @@ import ru.nubowski.timeTracker.model.Task;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO for response after creating a task.
+ */
 public class TaskCreateResponse {
     private Long id;
     private String name;

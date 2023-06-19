@@ -2,7 +2,9 @@ package ru.nubowski.timeTracker.dto.request;
 
 import jakarta.validation.constraints.Email;
 
-
+/**
+ * DTO for updating a user.
+ */
 public class UserUpdateRequest {
     @Email(message = "Invalid email format")
     private String email;

@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for handling user-related endpoints.
+ */
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -44,6 +47,11 @@ public class UserController {
         this.timeLogService = timeLogService;
     }
 
+    /**
+     * Returns all users.
+     *
+     * @return a list of all users.
+     */
     @GetMapping
     public ResponseEntity<List<UsersGetResponse>> getAllUsers() {
         LOGGER.info("Received request to get all users");
@@ -55,6 +63,12 @@ public class UserController {
         return ResponseEntity.ok(userDTOs);
     }
 
+    /**
+     * Returns the user with the given username.
+     *
+     * @param username the username of the user to retrieve.
+     * @return the user with the given username.
+     */
     @GetMapping("/{username}")
     public ResponseEntity<User> getUser(@PathVariable String username) {
         LOGGER.info("Received request to get user with username: {}", username);
@@ -63,6 +77,12 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    /**
+     * Creates a new user.
+     *
+     * @param request the details of the user to be created.
+     * @return the created user.
+     */
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(implementation = UsersGetResponse.class)))})
@@ -79,6 +99,14 @@ public class UserController {
         LOGGER.info("Created user: {}", createdUser.getUsername());
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
+
+    /**
+     * Updates the user with the given username.
+     *
+     * @param username the username of the user to be updated.
+     * @param request the new details of the user.
+     * @return the updated user.
+     */
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(implementation = UsersGetResponse.class)))})
@@ -94,11 +122,24 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    /**
+     * Deletes the user with the given username.
+     * NOT IMPLEMENTED YET
+     *
+     * @param username the username of the user to be deleted.
+     * @return HTTP status 503.
+     */
     @DeleteMapping("/{username}")
     public ResponseEntity<String> deleteUser(@PathVariable String username) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Feature not yet implemented");
     }
 
+    /**
+     * Deletes the user and their tasks with the given username.
+     *
+     * @param username the username of the user and their tasks to be deleted.
+     * @return a response entity with HTTP status 204.
+     */
     @DeleteMapping("/{username}/delete")
     public ResponseEntity<Void> deleteUserAndTasks(@PathVariable String username) {
         LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
@@ -108,6 +149,12 @@ public class UserController {
         return ResponseEntity.noContent().build(); // maybe add some feedback with string or 204 is enough
     }
 
+    /**
+     * Deletes all the tasks and time logs of the user with the given username.
+     *
+     * @param username the username of the user whose tasks and time logs are to be reset.
+     * @return the user after the reset.
+     */
     @DeleteMapping("/{username}/reset")
     public ResponseEntity<User> resetTimeLogsAndTasks(@PathVariable String username) {
         LOGGER.info("Received request to delete user with username: {} and all the their tasks", username);
@@ -117,6 +164,16 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    /**
+     * Returns the time logs of the user within the given date range.
+     *
+     * @param username the username of the user.
+     * @param start the start date of the range.
+     * @param end the end date of the range.
+     * @param sort the sort order of the time logs.
+     * @param output the output format of the time logs.
+     * @return a list of time logs of the user within the given date range.
+     */
     @GetMapping("/{username}/time_logs/date_range")
     public ResponseEntity<List<String>> getTimeLogsByUserAndDateRange(
             @PathVariable String username,
@@ -134,7 +191,14 @@ public class UserController {
         return ResponseEntity.ok(formattedTimeLogs);
     }
 
-    // only completed TimeLogs, TODO: add a method for check and add ongoing tasks too
+    /**
+     * Returns the total work effort of the user within the given date range.
+     *
+     * @param username the username of the user.
+     * @param start the start date of the range.
+     * @param end the end date of the range.
+     * @return the total work effort of the user within the given date range.
+     */
     @GetMapping("{username}/work_effort")
     public ResponseEntity<String> getTotalWorkEffortByUserAndDateRange(
             @PathVariable String username,

@@ -21,6 +21,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for handling task related endpoints.
+ */
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
@@ -38,6 +41,11 @@ public class TaskController {
     }
 
     // seems lise useless as is. should to return .size()
+    /**
+     * Returns all tasks.
+     *
+     * @return a list of all tasks.
+     */
     @GetMapping
     public ResponseEntity<List<TaskToResponse>> getAllTasks() {
         LOGGER.info("Received request to get all tasks");
@@ -49,6 +57,12 @@ public class TaskController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Returns the task with the given id.
+     *
+     * @param id the id of the task to retrieve.
+     * @return the task with the given id.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTask(@PathVariable Long id) {
         LOGGER.info("Received request to get task with id: {}", id);
@@ -57,6 +71,13 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
+    /**
+     * Creates a new task attached to the user with the given username.
+     *
+     * @param username the username of the user to attach the new task.
+     * @param request the details of the task to be created.
+     * @return the created task.
+     */
     @PostMapping("/{username}")
     public ResponseEntity<TaskCreateResponse> createTask(@PathVariable String username, @Valid @RequestBody TaskCreateRequest request) {
         LOGGER.info("Received request to create task: {} attached to the user {}", request.getName(), username);
@@ -69,6 +90,13 @@ public class TaskController {
         return new ResponseEntity<>(new TaskCreateResponse(createdTask), HttpStatus.CREATED);
     }
 
+    /**
+     * Updates the task with the given id.
+     *
+     * @param id the id of the task to be updated.
+     * @param request the details to update in the task.
+     * @return the updated task.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<TaskCreateResponse> updateTask(@PathVariable Long id, @RequestBody TaskCreateRequest request) {
         LOGGER.info("Received request to update task with id: {}", id);
@@ -81,6 +109,12 @@ public class TaskController {
             return new ResponseEntity<>(new TaskCreateResponse(updatedTask), HttpStatus.CREATED);
     }
 
+    /**
+     * Deletes the task with the given id.
+     *
+     * @param id the id of the task to be deleted.
+     * @return a response entity with HTTP status 204.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         LOGGER.info("Received request to delete task with id: {}", id);
@@ -89,6 +123,12 @@ public class TaskController {
         return ResponseEntity.noContent().build(); // 204 is OK or feedback?
     }
 
+    /**
+     * Starts the task with the given id.
+     *
+     * @param taskId the id of the task to start.
+     * @return the started task.
+     */
     @PostMapping("/start/{taskId}")
     public ResponseEntity<TaskStateResponse> startTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to start task with id {}", taskId);
@@ -104,6 +144,12 @@ public class TaskController {
         }
     }
 
+    /**
+     * Stops the task with the given id.
+     *
+     * @param taskId the id of the task to stop.
+     * @return the stopped task.
+     */
     @PostMapping("/stop/{taskId}")
     public ResponseEntity<TaskStateResponse> stopTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to stop task with id {}", taskId);
@@ -114,6 +160,12 @@ public class TaskController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    /**
+     * Pauses the task with the given id.
+     *
+     * @param taskId the id of the task to pause.
+     * @return the paused task.
+     */
     @PostMapping("/pause/{taskId}")
     public ResponseEntity<TaskStateResponse> pauseTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to pause task with id {}", taskId);
@@ -124,6 +176,12 @@ public class TaskController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    /**
+     * Resumes the task with the given id.
+     *
+     * @param taskId the id of the task to resume.
+     * @return the resumed task.
+     */
     @PostMapping("/resume/{taskId}")
     public ResponseEntity<TaskStateResponse> resumeTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to resume task with id {}", taskId);
@@ -134,6 +192,12 @@ public class TaskController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    /**
+     * Returns the time elapsed for the task with the given id.
+     *
+     * @param taskId the id of the task to retrieve time elapsed.
+     * @return the time elapsed for the task.
+     */
     @GetMapping("/{taskId}/time_elapsed")
     public ResponseEntity<Duration> getTaskTimeElapsed(@PathVariable Long taskId) {
         LOGGER.info("Received request to get time elapsed for task with id {}", taskId);

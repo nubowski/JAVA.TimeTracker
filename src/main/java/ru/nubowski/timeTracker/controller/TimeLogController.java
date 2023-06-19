@@ -16,6 +16,9 @@ import ru.nubowski.timeTracker.service.impl.TimeLogService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for handling time log related endpoints.
+ */
 @RestController
 @RequestMapping("/time_logs")
 public class TimeLogController {
@@ -30,6 +33,11 @@ public class TimeLogController {
         this.taskService = taskService;
     }
 
+    /**
+     * Returns all time logs.
+     *
+     * @return a list of all time logs.
+     */
     @GetMapping
     public ResponseEntity<List<TimeLog>> getAllTimeLogs() {
         LOGGER.info("Received request to get all time logs");
@@ -38,7 +46,12 @@ public class TimeLogController {
         return ResponseEntity.ok(timeLogs);
     }
 
-    // TODO need to convent of where is where (task->time-logs OR time-logs->task)
+    /**
+     * Returns the time logs associated with the given task id.
+     *
+     * @param taskId the id of the task whose time logs are to be retrieved.
+     * @return a list of time logs associated with the given task id.
+     */
     @GetMapping("/task/{taskId}")
     public ResponseEntity<List<TimeLogsByTaskResponse>> getTimeLogsByTask(@PathVariable Long taskId) {
         LOGGER.info("Received request to get time logs for task with id {}", taskId);
@@ -51,6 +64,12 @@ public class TimeLogController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Returns the time log with the given id.
+     *
+     * @param id the id of the time log to retrieve.
+     * @return the time log with the given id.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<TimeLogByIdResponse> getTimeLog(@PathVariable Long id) {
         LOGGER.info("Received request to get time log with id {}", id);
@@ -60,6 +79,12 @@ public class TimeLogController {
         return ResponseEntity.ok(timeLogResponse);
     }
 
+    /**
+     * Creates a new time log.
+     *
+     * @param timeLog the details of the time log to be created.
+     * @return the created time log.
+     */
     @PostMapping
     public ResponseEntity<TimeLog> createTimeLog(@RequestBody TimeLog timeLog) {
         LOGGER.info("Received request to create new time log");
@@ -68,6 +93,12 @@ public class TimeLogController {
         return new ResponseEntity<>(savedTimeLog, HttpStatus.CREATED);
     }
 
+    /**
+     * Deletes the time log with the given id.
+     *
+     * @param id the id of the time log to be deleted.
+     * @return a response entity with HTTP status 204.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTimeLog(@PathVariable Long id) {
         LOGGER.info("Received request to delete time log with id {}", id);

@@ -4,6 +4,9 @@ import ru.nubowski.timeTracker.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO for response after getting users
+ */
 public class UsersGetResponse {
     private Long id;
     private String username;

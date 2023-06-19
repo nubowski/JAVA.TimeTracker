@@ -4,6 +4,9 @@ import ru.nubowski.timeTracker.model.TimeLog;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO for response containing time logs by task.
+ */
 public class TimeLogsByTaskResponse {
     private Long id;
     private LocalDateTime startTime;

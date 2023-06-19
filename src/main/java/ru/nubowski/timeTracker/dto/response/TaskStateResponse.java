@@ -4,6 +4,9 @@ import ru.nubowski.timeTracker.model.TimeLog;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO for response containing task state details.
+ */
 public class TaskStateResponse {
     private Long taskId;
     private String taskName;

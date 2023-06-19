@@ -4,6 +4,9 @@ import ru.nubowski.timeTracker.model.TimeLog;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO for response containing time log details by id.
+ */
 public class TimeLogByIdResponse {
     private Long id;
     private LocalDateTime startTime;
