@@ -5,24 +5,43 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a time log in the time tracking system
+ */
 @Entity
 @Table(name = "time_logs")
 public class TimeLog {
+    /**
+     * The unique identifier of the time log
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    /**
+     * The start time of the time log.
+     */
     @Column(name = "start_time")
     private LocalDateTime startTime;
+    /**
+     * The end time of the time log.
+     */
     @Column(name = "end_time")
     private LocalDateTime endTime;
-
+    /**
+     * Indicates whether the time log was ended by the user.
+     * (DEPRECATED: This field may no longer be used and left as a tag.)
+     */
     @Column(name = "ended_by_user") // DEPRECATED
     private boolean endedByUser;
-
+    /**
+     * The state of the task associated with the time log.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "task_state")
     private TaskState taskState;
-
+    /**
+     * The task associated with the time log.
+     */
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     @JsonBackReference
