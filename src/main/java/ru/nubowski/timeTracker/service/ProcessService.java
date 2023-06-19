@@ -14,7 +14,9 @@ import ru.nubowski.timeTracker.service.impl.TimeLogService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+/**
+ * Service for managing processes related to all main services. UserService, TaskService, TimeLogService
+ */
 @Service
 public class ProcessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
@@ -25,6 +27,14 @@ public class ProcessService {
 
     private final TaskRepository taskRepository;
 
+    /**
+     * Constructor for ProcessService.
+     *
+     * @param taskService       the service for handling tasks
+     * @param timeLogService    the service for handling time logs
+     * @param userRepository    the repository for handling users
+     * @param taskRepository    the repository for handling tasks
+     */
     public ProcessService(TaskService taskService, TimeLogService timeLogService, UserRepository userRepository, TaskRepository taskRepository) {
         this.taskService = taskService;
         this.timeLogService = timeLogService;
@@ -32,6 +42,12 @@ public class ProcessService {
         this.taskRepository = taskRepository;
     }
 
+    /**
+     * Deletes a user and all tasks associated with that user.
+     *
+     * @param username  the name of the user to be deleted
+     * @throws UserNotFoundException if the specified user is not found
+     */
     @Transactional
     public void deleteTimeLogsAndTasks(String username) {
         LOGGER.info("Deleting user and associated tasks: {}", username);
@@ -48,6 +64,11 @@ public class ProcessService {
         });
     }
 
+    /**
+     * Deletes all users who were created before a specific date and time. Part of the cleanup  service.
+     *
+     * @param cutoff  the date and time to use as a cutoff for deletion
+     */
     public void deleteOldUsers(LocalDateTime cutoff) {
         LOGGER.info("Deleting users created before {}", cutoff);
         List<User> oldUsers = userRepository.findByCreatedAtBefore(cutoff);

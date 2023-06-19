@@ -10,6 +10,9 @@ import ru.nubowski.timeTracker.service.impl.TaskService;
 import ru.nubowski.timeTracker.service.impl.TimeLogService;
 
 import java.time.LocalDateTime;
+/**
+ * Service for performing scheduled cleanup operations.
+ */
 @Service
 public class CleanupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
@@ -18,6 +21,14 @@ public class CleanupService {
     private final ProcessService processService;
     private final CleanupProperties cleanupProperties;
 
+    /**
+     * Constructor for CleanupService.
+     *
+     * @param taskService         the service for handling tasks
+     * @param timeLogService      the service for handling time logs
+     * @param processService      the service for handling orchestral complex things with several services
+     * @param cleanupProperties   the properties used for configuring cleanup
+     */
     public CleanupService(TaskService taskService, TimeLogService timeLogService, ProcessService processService, CleanupProperties cleanupProperties) {
         this.taskService = taskService;
         this.timeLogService = timeLogService;
@@ -25,6 +36,12 @@ public class CleanupService {
         this.cleanupProperties = cleanupProperties;
     }
 
+    /**
+     * Scheduled method for cleaning up old tasks, time logs, and users.
+     * The cleanup frequency is determined by a cron expression defined in cleanupProperties.
+     *
+     * @throws CleanupFailedException if cleanup fails due to a specific problem
+     */
     @Scheduled(cron = "#{cleanupProperties.getCronExpression()}") // double check cron expression every time
     public void cleanup() {
         try {

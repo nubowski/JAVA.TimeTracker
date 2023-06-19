@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service for managing tasks.
+ */
 @Service
 public class TaskService {
     private static final  Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
@@ -25,34 +28,69 @@ public class TaskService {
     private final TimeLogRepository timeLogRepository;
 
 
+    /**
+     * Constructor for TaskService.
+     *
+     * @param clockProvider       custom provider to get the current time
+     * @param taskRepository      repository for handling tasks
+     * @param timeLogRepository   repository for handling time logs
+     */
     public TaskService(ClockProvider clockProvider, TaskRepository taskRepository, TimeLogRepository timeLogRepository) {
         this.clockProvider = clockProvider;
         this.taskRepository = taskRepository;
         this.timeLogRepository = timeLogRepository;
     }
 
+    /**
+     * Gets a list of all tasks.
+     *
+     * @return the list of all tasks
+     */
     public List<Task> getAllTasks() {
         LOGGER.info("Getting all tasks");
         return taskRepository.findAll();
     }
 
+    /**
+     * Gets a task by its id.
+     *
+     * @param id  the id of the task
+     * @return the task with the specified id
+     * @throws TaskNotFoundException if the task is not found
+     */
     public Task getTask(Long id) {
         LOGGER.debug("Getting task with id: {}", id); // TODO: make some notes of debug/info statements, low view
         return taskRepository.findById(id).
                 orElseThrow(() -> new TaskNotFoundException(id));
     }
 
+    /**
+     * Saves a new task.
+     *
+     * @param task the task to be saved
+     * @return the saved task
+     */
     public Task saveTask(Task task) {
         LOGGER.info("Saving task with id: {}", task.getId());
         task.setCreatedAt(LocalDateTime.now());
         return taskRepository.save(task);
     }
 
+    /**
+     * Deletes a task by its id.
+     *
+     * @param id the id of the task to be deleted
+     */
     public void deleteTask (Long id) {
         LOGGER.info("Deleting task with id: {}", id);
         taskRepository.deleteById(id);
     }
 
+    /**
+     * Deletes tasks created before the specified date.
+     *
+     * @param cutoff the date threshold for task deletion
+     */
     public void deleteOldTasks(LocalDateTime cutoff) {
         LOGGER.debug("Deleting tasks created before: {}", cutoff);
         List<Task> oldTasks = taskRepository.findByCreatedAtBefore(cutoff);
@@ -64,6 +102,12 @@ public class TaskService {
         }
     }
 
+    /**
+     * Starts a task and creates a new time log.
+     *
+     * @param task the task to be started
+     * @return the created time log
+     */
     public TimeLog startTask(Task task) {
         LOGGER.info("Starting a task: {}", task.getId());
         TimeLog timeLog = new TimeLog();
@@ -73,6 +117,13 @@ public class TaskService {
         return timeLogRepository.save(timeLog);
     }
 
+    /**
+     * Stops a task and updates the corresponding time log.
+     *
+     * @param task the task to be stopped
+     * @return the updated time log
+     * @throws OngoingTaskNotFoundException if there is no ongoing task
+     */
     public TimeLog stopTask(Task task) {
         LOGGER.info("Stopping task: {}", task.getId());
         TimeLog timeLog = timeLogRepository.findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc(task). // perfect naming ^-^
@@ -82,6 +133,14 @@ public class TaskService {
         return timeLogRepository.save(timeLog);
     }
 
+    /**
+     * Resumes a task and creates a new time log.
+     * It is mostly for tag a task with USER_STOPPED and make a new one after PAUSE
+     *
+     * @param task the task to be resumed
+     * @return the created time log
+     * @throws OngoingTaskNotFoundException if there is no ongoing task
+     */
     public TimeLog resumeTask(Task task) {
         TimeLog timeLog = timeLogRepository.findByTaskAndTaskState(task, TaskState.PAUSED).
                 orElseThrow(() -> new OngoingTaskNotFoundException(task.getId()));
@@ -90,6 +149,13 @@ public class TaskService {
         return startTask(task);
     }
 
+    /**
+     * Pauses a task and change its status to PAUSE.
+     * It is mostly for tag a task with PAUSED and not closed, so make a task not CLOSED
+     *
+     * @param task the task to be paused
+     * @return save the time log statement
+     */
     public TimeLog pauseTask(Task task) {
         LOGGER.info("Pausing task: {}", task.getId());
         TimeLog timeLog = timeLogRepository.findFirstByTaskAndEndTimeIsNullOrderByStartTimeDesc(task).
@@ -99,6 +165,12 @@ public class TaskService {
         return timeLogRepository.save(timeLog);
     }
 
+    /**
+     * Find a task by ID and update its fields
+     *
+     * @param request DTO of the task from TaskCreateRequest with needed fields of view
+     * @return updated task
+     */
     public Task updateTask(Long id, TaskCreateRequest request) {
         Task taskToUpdate = taskRepository.findById(id).get(); // fixed doubling, and now .get without isPresent -_-
         taskToUpdate.setName(request.getName());
@@ -108,6 +180,12 @@ public class TaskService {
         return taskToUpdate;
     }
 
+    /**
+     * Check if task is present.
+     *
+     * @param id the id of the checked task
+     * @return TRUE if it is present and FALSE if not
+     */
     public boolean taskIsPresent(Long id) {
         Optional<Task> checkTask = taskRepository.findById(id);
         return checkTask.isPresent();
