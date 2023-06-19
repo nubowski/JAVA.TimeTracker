@@ -10,7 +10,7 @@ This application is designed to help manage and track time spent on tasks. It is
 
 ## Documentation
 
-For more detailed information about the API and how to use it, please refer to our [API Guide](https://github.com/nubowski/JAVA.TimeTracker/blob/master/Docs/API_GUIDE.md)
+For more detailed information about the API and how to use it, please refer to our [API Guide](https://github.com/nubowski/JAVA.TimeTracker/blob/master/Docs/API_GUIDE.md) and [JAVA Docs](https://nubowski.github.io/)
 
 ## How to Run
 
